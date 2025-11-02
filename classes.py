@@ -25,7 +25,7 @@ class Game:
         self.passive_cards = []
         self.shuffle()
         self.dealer = Dealer()
-        self.players = {}
+        self.players = []
         self.min_bet = int(config['GAME']['MIN_BET'])
         
     def shuffle(self):
@@ -34,7 +34,7 @@ class Game:
         random.shuffle(self.stack)
 
     def add_player(self, player):
-        self.players.update({player.idx: player})
+        self.players.append(player)
 
     def put_back(self, cards):
         self.passive_cards.extend(cards)
@@ -42,14 +42,14 @@ class Game:
     def deal_initial_cards(self):
         for i in range(2):
             for player in self.players:
-                player.add_card(self.stack.pop(), 0)
-            self.dealer.add_card(self.stack.pop(), 0)
+                player.add_card(self.stack.pop())
+            self.dealer.add_card(self.stack.pop())
 
 
 class Player:
     def __init__(self, idx):
         self.idx = idx
-        self.hands = []
+        self.hands = [[]]
         self.bets = []
         self.capital = int([x.strip() for x in config['PLAYERS']['CAPITALS'].split(',')][idx])
         self.card_sum = 0
@@ -63,10 +63,10 @@ class Player:
         else:
             raise ValueError("Bet is greater than capital")
 
-    def add_card(self, card, hand_idx):
-        self.hands[hand_idx].append(card)
+    def add_card(self, card, hand_idx=0):
         if (card == 11) and ((self.card_sum + card) > 21):
             card = 1
+        self.hands[hand_idx].append(card)
         self.card_sum += card
 
 
@@ -74,3 +74,9 @@ class Dealer:
     def __init__(self):
         self.hand = []
         self.card_sum = 0
+
+    def add_card(self, card, hand_idx=0):
+        self.hand.append(card)
+        if (card == 11) and ((self.card_sum + card) > 21):
+            card = 1
+        self.card_sum += card

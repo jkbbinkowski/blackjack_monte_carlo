@@ -24,5 +24,4 @@ for i in range(int(config['SIMULATION']['AMOUNT'])):
     
     game.deal_initial_cards()
 
-    print(game.players[0].hands)
-    print(game.dealer.hand)
+    
