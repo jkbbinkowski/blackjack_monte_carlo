@@ -49,6 +49,9 @@ class Game:
                 player.add_card(self.stack.pop())
             self.dealer.add_card(self.stack.pop())
         self.dealer_face_card = self.dealer.hand[0]
+        print(f"Player 0 initial card: {self.players[0].hands}")
+        print(f"Dealer initial cards: {self.dealer.hand}")
+
 
     def prepare_for_next_round(self):
         for player in self.players:
