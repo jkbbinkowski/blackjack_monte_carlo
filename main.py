@@ -59,9 +59,5 @@ for i in tqdm.tqdm(range(int(config['SIMULATION']['AMOUNT']))):
 
 if config['SIMULATION']['RESULT_OUTPUT'] == 'excel':
     classes.Result.save_to_excel()
-elif config['SIMULATION']['RESULT_OUTPUT'] == 'test':
-    print(f"Total profit: {classes.Result.total_profit}")
-    print(f"Total bets: {classes.Result.total_bets}")
-    print(f"EV: {classes.Result.total_profit/classes.Result.total_bets}")
         
     
