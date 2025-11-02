@@ -190,9 +190,8 @@ class Dealer:
 
 
 class Result:
-    # Class variables to store all results for Excel export
-    all_results = []
-    current_round = 0
+    total_profit = 0
+    total_bets = 0
     
     def __init__(self):
         self.type = None
@@ -212,83 +211,12 @@ class Result:
         else:
             return 1
 
-    def _to_excel_row(self, round_num, hand_idx):
-        rows = []
-        roi = self._calculate_roi(hand_idx)
-        row = {
-            'round': round_num,
-            'player_idx': self.player.idx,
-            'hand_idx': hand_idx,
-            'type': self.type,
-            'ROI': roi,
-            'profit': self.player.bets[hand_idx]*(roi - 1),
-            'hand': str(self.player.hands[hand_idx]),
-            'hand_sum': self.player.hand_sums[hand_idx],
-            'bet': self.player.bets[hand_idx],
-            'capital_after': self.player.capital,
-            'strategy': self.player.strategy,
-            'move_history': str(self.player.move_history),
-            'dealer_face_card': self.game.dealer_face_card,
-            'dealer_hand': str(self.game.dealer.hand),
-            'dealer_hand_sum': self.game.dealer.hand_sum,
-        }
-        rows.append(row)
-            
-        if len(self.player.hands) > 1 and hand_idx == (len(self.player.hands) - 1):
-            row = {
-                'round': round_num,
-                'player_idx': self.player.idx,
-                'hand_idx': "Total",
-                'type': None,
-                'ROI': None,
-                'profit': None,
-                'hand': str(self.player.hands),
-                'hand_sum': str(self.player.hand_sums),
-                'bet': str(self.player.bets),
-                'capital_after': None,
-                'strategy': None,
-                'move_history': None,
-                'dealer_face_card': self.game.dealer_face_card,
-                'dealer_hand': str(self.game.dealer.hand),
-                'dealer_hand_sum': self.game.dealer.hand_sum,
-            }
-            rows.append(row)
-        return rows
-
     def generate(self, type, player, game, hand_idx):
         self.type = type
         self.player = player
         self.game = game
         self.hand_idx = hand_idx
 
-        if config['SIMULATION']['RESULT_OUTPUT'] == 'excel':
-            rows = self._to_excel_row(Result.current_round, hand_idx)
-            Result.all_results.extend(rows)
-    
-    @classmethod
-    def increment_round(cls):
-        cls.current_round += 1
-    
-    @classmethod
-    def reset_round(cls):
-        cls.current_round = 0
-    
-    @classmethod
-    def save_to_excel(cls, filename=None):
-        if not cls.all_results:
-            return
-        
-        if filename is None:
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            filename = f"{config['SIMULATION']['RESULT_OUTPUT_FOLDER']}/results_{timestamp}.xlsx"
-        
-        df = pd.DataFrame(cls.all_results)
-        df.to_excel(f"{filename}", index=False, engine='openpyxl')
-        print(f"Results saved to {filename}")
-        
-        # Clear results after saving
-        cls.all_results = []
-    
-    @classmethod
-    def clear_results(cls):
-        cls.all_results = []
+        if config['SIMULATION']['RESULT_OUTPUT'] == 'test':
+            Result.total_profit += player.bets[hand_idx]*(self._calculate_roi(hand_idx) - 1)
+            Result.total_bets += player.bets[hand_idx]
