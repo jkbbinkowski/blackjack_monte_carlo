@@ -33,6 +33,7 @@ class Game:
         self.stack.extend(self.passive_cards)
         self.passive_cards = []
         random.shuffle(self.stack)
+        print(f"Shuffling...")
 
     def add_player(self, player):
         self.players.append(player)
@@ -41,11 +42,19 @@ class Game:
         self.passive_cards.extend(cards)
 
     def deal_initial_cards(self):
+        if len(self.stack) <= int(config['GAME']['SHUFFLE_DECK_ON']):
+            self.shuffle()
         for i in range(2):
             for player in self.players:
                 player.add_card(self.stack.pop())
             self.dealer.add_card(self.stack.pop())
         self.dealer_face_card = self.dealer.hand[0]
+
+    def prepare_for_next_round(self):
+        for player in self.players:
+            self.put_back(player.prepare_for_next_round())
+        self.put_back(self.dealer.prepare_for_next_round())
+        self.dealer_face_card = None
 
 
 class Player:
@@ -130,6 +139,18 @@ class Player:
                     self.result.generate('Loss', self, game, hand_idx=hand_idx)
         return self.result.__dict__()
 
+    def prepare_for_next_round(self):
+        cards = []
+        for hand in self.hands:
+            cards.extend(hand)
+        self.hands = [[]]
+        self.bets = []
+        self.hand_sums = [0]
+        self.surrender = False
+        self.move_history = []
+
+        return cards
+
 
 class Dealer:
     def __init__(self):
@@ -157,6 +178,13 @@ class Dealer:
         if int(config['DEALER']['HIT_ON_SOFT_17']) == 1 and (11 in self.hand) and (self.hand_sum == 17):
             self.add_card(game.stack.pop())
 
+    def prepare_for_next_round(self):
+        cards = self.hand
+        self.hand = []
+        self.hand_sum = 0
+
+        return cards
+
 
 class Result:
     def __init__(self):
@@ -182,9 +210,8 @@ class Result:
                 result.update({f'hand_{idx}': {
                     'type': self.type,
                     'profit': profit,
-                    'hand_idx': self.hand_idx,
-                    'hands': self.player.hands,
-                    'hand_sums': self.player.hand_sums,
+                    'hand': self.player.hands[idx],
+                    'hand_sum': self.player.hand_sums[idx],
                     'move_history': self.player.move_history,
                     'bets': self.player.bets,
                     'capital': self.player.capital,
@@ -198,9 +225,8 @@ class Result:
                 result.update({'total': {
                     'type': self.type,
                     'profit': profit,
-                    'hand_idx': self.hand_idx,
-                    'hands': self.player.hands,
-                    'hand_sums': self.player.hand_sums,
+                    'hand': self.player.hands[idx],
+                    'hand_sum': self.player.hand_sums[idx],
                     'move_history': self.player.move_history,
                     'bets': self.player.bets,
                     'capital': self.player.capital,

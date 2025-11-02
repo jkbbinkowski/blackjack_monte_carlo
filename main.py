@@ -47,5 +47,9 @@ for i in range(int(config['SIMULATION']['AMOUNT'])):
         for player in players:
             score = player.evaluate_score(game)
             print(f"Player {player.idx} score: {json.dumps(score)}")
+
+    game.prepare_for_next_round()
+    print(f"Stack: {len(game.stack)}")
+    print(f"Passive cards: {len(game.passive_cards)}")
         
     
