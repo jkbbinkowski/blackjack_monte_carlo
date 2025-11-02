@@ -116,33 +116,31 @@ class Player:
 
     def evaluate_score(self, game):
         if self.surrender:
-            self.capital += self.bets[0] / 2
+            self.capital += self.bets[0] / 2 # half of original bet coming back
             self.result.generate('Surrender', self, game, hand_idx=0)
         else:
             for hand_idx in range(len(self.hands)):
                 # Check for player blackjack (only if dealer doesn't also have blackjack)
                 if (10 in self.hands[hand_idx]) and (11 in self.hands[hand_idx]) and (not game.dealer.check_blackjack()) and (self.hand_sums[hand_idx] == 21):
-                    self.capital += self.bets[hand_idx] * 2.5
+                    self.capital += self.bets[hand_idx] * 2.5 # blackjack payout and original bet
                     self.result.generate('Blackjack', self, game, hand_idx)
                 elif self.hand_sums[hand_idx] > 21:
                     # Player busted
-                    self.capital -= self.bets[hand_idx]
                     self.result.generate('Loss', self, game, hand_idx)
                 elif game.dealer.hand_sum > 21:
                     # Dealer busted, player wins (only if player didn't bust)
-                    self.capital += self.bets[hand_idx] * 2
+                    self.capital += self.bets[hand_idx] * 2 # original bet and payout
                     self.result.generate('Win', self, game, hand_idx)
                 elif self.hand_sums[hand_idx] > game.dealer.hand_sum:
                     # Player has higher score
-                    self.capital += self.bets[hand_idx] * 2
+                    self.capital += self.bets[hand_idx] * 2 # original bet and payout
                     self.result.generate('Win', self, game, hand_idx)
                 elif self.hand_sums[hand_idx] == game.dealer.hand_sum:
                     # Push
-                    self.capital += self.bets[hand_idx]
+                    self.capital += self.bets[hand_idx] # original bet
                     self.result.generate('Push', self, game, hand_idx)
                 else:
                     self.result.generate('Loss', self, game, hand_idx)
-        return self.result.__dict__()
 
     def prepare_for_next_round(self):
         cards = []
@@ -202,33 +200,30 @@ class Result:
         self.game = None
         self.hand_idx = 0
 
-    def _calculate_profit(self, idx):
-        """Calculate profit for a specific hand index"""
+    def _calculate_roi(self, idx):
         if self.type == 'Blackjack':
-            return self.player.bets[idx] * 1.5
+            return 2.5
         elif self.type == 'Win':
-            return self.player.bets[idx]
+            return 2
         elif self.type == 'Loss':
-            return -self.player.bets[idx]
-        elif self.type == 'Surrender':
-            return -self.player.bets[0] / 2
-        else:
             return 0
+        elif self.type == 'Surrender':
+            return 0.5
+        else:
+            return 1
 
     def _to_excel_row(self, round_num, hand_idx):
-        """Convert result to Excel row format"""
         rows = []
-        profit = self._calculate_profit(hand_idx)
+        roi = self._calculate_roi(hand_idx)
         row = {
             'round': round_num,
             'player_idx': self.player.idx,
             'hand_idx': hand_idx,
             'type': self.type,
-            'profit': profit,
+            'ROI': roi,
             'hand': str(self.player.hands[hand_idx]),
             'hand_sum': self.player.hand_sums[hand_idx],
             'bet': self.player.bets[hand_idx],
-            'capital_before': self.player.capital - profit,
             'capital_after': self.player.capital,
             'strategy': self.player.strategy,
             'move_history': str(self.player.move_history),
@@ -244,11 +239,10 @@ class Result:
                 'player_idx': self.player.idx,
                 'hand_idx': "Total",
                 'type': None,
-                'profit': None,
+                'ROI': None,
                 'hand': str(self.player.hands),
                 'hand_sum': str(self.player.hand_sums),
                 'bet': str(self.player.bets),
-                'capital_before': None,
                 'capital_after': None,
                 'strategy': None,
                 'move_history': None,
@@ -259,95 +253,35 @@ class Result:
             rows.append(row)
         return rows
 
-    def __dict__(self):
-        if config['SIMULATION']['RESULT_OUTPUT'] == 'full':
-            result = {}
-            for idx, hand in enumerate(self.player.hands):
-                profit = self._calculate_profit(idx)
-                result.update({f'hand_{idx}': {
-                    'type': self.type,
-                    'profit': profit,
-                    'hand': self.player.hands[idx],
-                    'hand_sum': self.player.hand_sums[idx],
-                    'move_history': self.player.move_history,
-                    'bets': self.player.bets,
-                    'capital_before': self.player.capital + self.player.bets[idx],
-                    'capital_after': self.player.capital,
-                    'strategy': self.player.strategy,
-                    'dealer_face_card': self.game.dealer_face_card,
-                    'dealer_hand': self.game.dealer.hand,
-                    'dealer_hand_sum': self.game.dealer.hand_sum
-                }
-            })
-            if len(self.player.hands) > 1:
-                result.update({'total': {
-                    'type': self.type,
-                    'profit': profit,
-                    'hand': self.player.hands[idx],
-                    'hand_sum': self.player.hand_sums[idx],
-                    'move_history': self.player.move_history,
-                    'bets': self.player.bets,
-                    'capital_before': self.player.capital + sum(self.player.bets),
-                    'capital_after': self.player.capital,
-                    'strategy': self.player.strategy,
-                    'dealer_face_card': self.game.dealer_face_card,
-                    'dealer_hand': self.game.dealer.hand,
-                    'dealer_hand_sum': self.game.dealer.hand_sum
-                }})
-            return result
-        elif config['SIMULATION']['RESULT_OUTPUT'] == 'basic':
-            return {
-                'type': self.type,
-                'hands': self.player.hands,
-                'hand_sums': self.player.hand_sums,
-                'dealer_hand': self.game.dealer.hand,
-                'dealer_hand_sum': self.game.dealer.hand_sum
-            }
-        elif config['SIMULATION']['RESULT_OUTPUT'] == 'minimal':
-            return {
-                'type': self.type
-            }
-        elif config['SIMULATION']['RESULT_OUTPUT'] == 'excel':
-            # For excel mode, return None but store the result
-            return None
-
     def generate(self, type, player, game, hand_idx):
         self.type = type
         self.player = player
         self.game = game
         self.hand_idx = hand_idx
-        
-        result_dict = self.__dict__()
-        
-        # If excel mode, add rows to the collection
+
         if config['SIMULATION']['RESULT_OUTPUT'] == 'excel':
             rows = self._to_excel_row(Result.current_round, hand_idx)
             Result.all_results.extend(rows)
-        
-        return result_dict
     
     @classmethod
     def increment_round(cls):
-        """Increment the round counter"""
         cls.current_round += 1
     
     @classmethod
     def reset_round(cls):
-        """Reset the round counter"""
         cls.current_round = 0
     
     @classmethod
     def save_to_excel(cls, filename=None):
-        """Save all collected results to an Excel file"""
         if not cls.all_results:
             return
         
         if filename is None:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            filename = f"blackjack_results_{timestamp}.xlsx"
+            filename = f"{config['SIMULATION']['RESULT_OUTPUT_FOLDER']}/results_{timestamp}.xlsx"
         
         df = pd.DataFrame(cls.all_results)
-        df.to_excel(filename, index=False, engine='openpyxl')
+        df.to_excel(f"{filename}", index=False, engine='openpyxl')
         print(f"Results saved to {filename}")
         
         # Clear results after saving
@@ -355,5 +289,4 @@ class Result:
     
     @classmethod
     def clear_results(cls):
-        """Clear all collected results"""
         cls.all_results = []

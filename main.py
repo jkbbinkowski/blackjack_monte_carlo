@@ -49,18 +49,13 @@ for i in range(int(config['SIMULATION']['AMOUNT'])):
         # Evaluate scores
         for player in players:
             score = player.evaluate_score(game)
-            if config['SIMULATION']['RESULT_OUTPUT'] != 'excel':
-                print(f"Player {player.idx} score: {json.dumps(score)}")
     else:
         # If dealer has blackjack, evaluate scores
         for player in players:
             score = player.evaluate_score(game)
-            if config['SIMULATION']['RESULT_OUTPUT'] != 'excel':
-                print(f"Player {player.idx} score: {json.dumps(score)}")
 
     game.prepare_for_next_round()
 
-# Save to Excel if excel mode is enabled
 if config['SIMULATION']['RESULT_OUTPUT'] == 'excel':
     classes.Result.save_to_excel()
         
