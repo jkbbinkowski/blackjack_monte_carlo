@@ -7,7 +7,7 @@ config.read('config.ini')
 
 
 game = classes.Game()
-players = []
 for i in range(int(config['PLAYERS']['AMOUNT'])):
-    players.append(classes.Player(i))
+    game.add_player(classes.Player(i))
 
+print(game.stack)

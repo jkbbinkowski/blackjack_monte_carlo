@@ -21,14 +21,20 @@ class Deck:
 
 class Game:
     def __init__(self):
-        self.active_cards = Deck().cards * int(config['GAME']['DECKS_AMOUNT'])
+        self.stack = Deck().cards * int(config['GAME']['DECKS_AMOUNT'])
         self.passive_cards = []
         self.shuffle()
+        self.dealer = Dealer()
+        self.players = {}
+        self.min_bet = int(config['GAME']['MIN_BET'])
         
     def shuffle(self):
-        self.active_cards.extend(self.passive_cards)
+        self.stack.extend(self.passive_cards)
         self.passive_cards = []
-        random.shuffle(self.active_cards)
+        random.shuffle(self.stack)
+
+    def add_player(self, player):
+        self.players.update({player.idx: player})
     
 
 class Player:
@@ -42,4 +48,5 @@ class Player:
 class Dealer:
     def __init__(self):
         self.hand = []
-        
+        self.card_sum = 0
+
