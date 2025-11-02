@@ -70,7 +70,6 @@ def play(game, player):
                         player_move = "S"
             elif "SP" in player_move:
                 player.split(game, hand_index)
-                print(f"Player hands (from basic strategy): {player.hands}")
                 player.move_history.append(player_move)
                 hand_index = -1
                 player_move = "S"

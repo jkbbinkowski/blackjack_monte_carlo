@@ -1,5 +1,7 @@
 import configparser
 import random
+import pandas as pd
+from datetime import datetime
 
 
 config = configparser.ConfigParser()
@@ -101,21 +103,16 @@ class Player:
         self.hit(game, hand_idx=hand_idx)
 
     def split(self, game, hand_idx):
-        print(f"Hand before split: {self.hands[hand_idx]}")
-        print(f"Hand sum before split: {self.hand_sums[hand_idx]}")
-        print(game.stack)
         self.place_new_bet()
         self.hands.append([self.hands[hand_idx].pop()])
         if self.hands[hand_idx][0] == 1:
             self.hands[hand_idx][0] = 11
-        if self.hands[hand_idx+1][0] == 1:
-            self.hands[hand_idx+1][0] = 11
+        if self.hands[len(self.hands)-1][0] == 1:
+            self.hands[len(self.hands)-1][0] = 11
         self.hand_sums[hand_idx] = self.hands[hand_idx][0]
-        self.hand_sums.append(self.hands[hand_idx+1][0])
+        self.hand_sums.append(self.hands[len(self.hands)-1][0])
         self.add_card(game.stack.pop(), hand_idx)
         self.add_card(game.stack.pop(), len(self.hands)-1)
-        print(f"Hand after split: {self.hands}")
-        print(f"Hand sum after split: {self.hand_sums}")
 
     def evaluate_score(self, game):
         if self.surrender:
@@ -197,26 +194,59 @@ class Dealer:
 
 
 class Result:
+    # Class variables to store all results for Excel export
+    all_results = []
+    current_round = 0
+    
     def __init__(self):
         self.type = None
         self.player = None
         self.game = None
         self.hand_idx = 0
 
+    def _calculate_profit(self, idx):
+        """Calculate profit for a specific hand index"""
+        if self.type == 'Blackjack':
+            return self.player.bets[idx] * 2.5
+        elif self.type == 'Win':
+            return self.player.bets[idx] * 2
+        elif self.type == 'Loss':
+            return -self.player.bets[idx]
+        elif self.type == 'Surrender':
+            return -self.player.bets[0] / 2
+        else:
+            return 0
+
+    def _to_excel_row(self, round_num):
+        """Convert result to Excel row format"""
+        rows = []
+        for idx, hand in enumerate(self.player.hands):
+            profit = self._calculate_profit(idx)
+            row = {
+                'round': round_num,
+                'player_idx': self.player.idx,
+                'hand_idx': idx,
+                'type': self.type,
+                'profit': profit,
+                'hand': str(self.player.hands[idx]),
+                'hand_sum': self.player.hand_sums[idx],
+                'bet': self.player.bets[idx],
+                'total_bet': sum(self.player.bets),
+                'capital': self.player.capital,
+                'strategy': self.player.strategy,
+                'move_history': str(self.player.move_history),
+                'dealer_face_card': self.game.dealer_face_card,
+                'dealer_hand': str(self.game.dealer.hand),
+                'dealer_hand_sum': self.game.dealer.hand_sum
+            }
+            rows.append(row)
+        return rows
+
     def __dict__(self):
         if config['SIMULATION']['RESULT_OUTPUT'] == 'full':
             result = {}
             for idx, hand in enumerate(self.player.hands):
-                if self.type == 'Blackjack':
-                    profit = self.player.bets[idx] * 2.5
-                elif self.type == 'Win':
-                    profit = self.player.bets[idx] * 2
-                elif self.type == 'Loss':
-                    profit = -self.player.bets[idx]
-                elif self.type == 'Surrender':
-                    profit = -self.player.bets[0] / 2
-                else:
-                    profit = 0
+                profit = self._calculate_profit(idx)
                 result.update({f'hand_{idx}': {
                     'type': self.type,
                     'profit': profit,
@@ -258,10 +288,53 @@ class Result:
             return {
                 'type': self.type
             }
+        elif config['SIMULATION']['RESULT_OUTPUT'] == 'excel':
+            # For excel mode, return None but store the result
+            return None
 
     def generate(self, type, player, game, hand_idx):
         self.type = type
         self.player = player
         self.game = game
         self.hand_idx = hand_idx
-        return self.__dict__()
+        
+        result_dict = self.__dict__()
+        
+        # If excel mode, add rows to the collection
+        if config['SIMULATION']['RESULT_OUTPUT'] == 'excel':
+            rows = self._to_excel_row(Result.current_round)
+            Result.all_results.extend(rows)
+        
+        return result_dict
+    
+    @classmethod
+    def increment_round(cls):
+        """Increment the round counter"""
+        cls.current_round += 1
+    
+    @classmethod
+    def reset_round(cls):
+        """Reset the round counter"""
+        cls.current_round = 0
+    
+    @classmethod
+    def save_to_excel(cls, filename=None):
+        """Save all collected results to an Excel file"""
+        if not cls.all_results:
+            return
+        
+        if filename is None:
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            filename = f"blackjack_results_{timestamp}.xlsx"
+        
+        df = pd.DataFrame(cls.all_results)
+        df.to_excel(filename, index=False, engine='openpyxl')
+        print(f"Results saved to {filename}")
+        
+        # Clear results after saving
+        cls.all_results = []
+    
+    @classmethod
+    def clear_results(cls):
+        """Clear all collected results"""
+        cls.all_results = []
