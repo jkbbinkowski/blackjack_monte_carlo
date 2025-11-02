@@ -211,24 +211,17 @@ class Result:
                 }})
             return result
         elif config['SIMULATION']['RESULT_OUTPUT'] == 'basic':
-            result = {}
-            for idx, hand in enumerate(self.player.hands):
-                result[f'hand_{idx}'] = {
-                    'type': self.type,
-                    'cards': hand,
-                    'sum': self.player.hand_sums[idx],
-                }
-            return result
+            return {
+                'type': self.type,
+                'hands': self.player.hands,
+                'hand_sums': self.player.hand_sums,
+                'dealer_hand': self.game.dealer.hand,
+                'dealer_hand_sum': self.game.dealer.hand_sum
+            }
         elif config['SIMULATION']['RESULT_OUTPUT'] == 'minimal':
-            result = {}
-            for idx, hand in enumerate(self.player.hands):
-                result[f'hand_{idx}'] = {
-                    'cards': hand,
-                    'sum': self.player.hand_sums[idx],
-                }
-            return result
-        else:
-            raise ValueError("Invalid result output")
+            return {
+                'type': self.type
+            }
 
     def generate(self, type, player, game, hand_idx=0):
         self.type = type
