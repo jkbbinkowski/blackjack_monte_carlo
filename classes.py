@@ -193,6 +193,8 @@ class Result:
     # Class variables to store all results for Excel export
     all_results = []
     current_round = 0
+    total_profit = 0
+    total_bets = 0
     
     def __init__(self):
         self.type = None
@@ -264,6 +266,8 @@ class Result:
         if config['SIMULATION']['RESULT_OUTPUT'] == 'excel':
             rows = self._to_excel_row(Result.current_round, hand_idx)
             Result.all_results.extend(rows)
+            Result.total_profit += player.bets[hand_idx]*(self._calculate_roi(hand_idx) - 1)
+            Result.total_bets += player.bets[hand_idx]
     
     @classmethod
     def increment_round(cls):

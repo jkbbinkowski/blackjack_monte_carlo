@@ -58,6 +58,9 @@ for i in tqdm.tqdm(range(int(config['SIMULATION']['AMOUNT']))):
     game.prepare_for_next_round()
 
 if config['SIMULATION']['RESULT_OUTPUT'] == 'excel':
-    classes.Result.save_to_excel()
-        
+    #classes.Result.save_to_excel()
+
+    print(f"Total profit: {classes.Result.total_profit}")
+    print(f"Total bets: {classes.Result.total_bets}")
+    print(f"Expected Value: {classes.Result.total_profit/classes.Result.total_bets}")
     
