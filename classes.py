@@ -57,6 +57,7 @@ class Player:
         self.hand_sums = [0]
         self.strategy = [x.strip() for x in config['PLAYERS']['STRATEGIES'].split(',')][idx]
         self.surrender = False
+        self.move_history = []
 
     def place_new_bet(self):
         ### HERE MAKE DIFFERENT BETTING STRATEGIES FOR DIFFERENT PLAYERS (NOW IS SIMPLY MINIMAL BET)

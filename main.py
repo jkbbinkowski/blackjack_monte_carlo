@@ -30,6 +30,7 @@ for i in range(int(config['SIMULATION']['AMOUNT'])):
             strategies.play(game, player)
             print(f"Player {player.idx} hands: {player.hands}")
             print(f"Player {player.idx} hand sums: {player.hand_sums}")
+            print(f"Player {player.idx} move history: {player.move_history}")
     else:
         pass
         ### IN CASE OF DEALER BLACKJACK

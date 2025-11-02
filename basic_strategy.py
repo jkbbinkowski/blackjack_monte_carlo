@@ -49,30 +49,38 @@ def play(game, player):
     hand_index = 0
     while hand_index < len(player.hands):
         player_move = decide_move(player, game, hand_index)
-        print(f"Player {player.idx} hand {hand_index} move: {player_move}")
         while player_move != "S":
-            print(f"Player {player.idx} hand {hand_index} move: {player_move}")
             if "H" in player_move:
                 player.hit(game, hand_index)
+                player.move_history.append(player_move)
                 player_move = decide_move(player, game, hand_index)
             elif "D" in player_move:
-                player.double_down(game, hand_index)
-                player_move = "S"
+                if len(player.move_history) == 0:
+                    player.double_down(game, hand_index)
+                    player.move_history.append(player_move)
+                    player_move = decide_move(player, game, hand_index)
+                else:
+                    player_move = player_move.replace("D", "").capitalize()
+                    player.move_history.append(player_move)
+                    player_move = decide_move(player, game, hand_index)
             elif "SP" in player_move:
                 player.split(game, hand_index)
+                player.move_history.append(player_move)
                 player_move = decide_move(player, game, hand_index)
             elif "U" in player_move:
                 player.surrender = True
-                player_move = "S"
         hand_index += 1
 
 
 def decide_move(player, game, hand_index):
-    if (not 11 in player.hands[hand_index]) and (player.hands[hand_index][0] != player.hands[hand_index][1]): 
-        player_move = basic_strategy_hard[player.hand_sums[hand_index]][game.dealer_face_card]
-    elif (not 11 in player.hands[hand_index]) and (player.hands[hand_index][0] == player.hands[hand_index][1]):
-        player_move = basic_strategy_pairs[player.hands[hand_index][0]][game.dealer_face_card]
+    if player.hand_sums[hand_index] <= 21:
+        if (not 11 in player.hands[hand_index]) and (player.hands[hand_index][0] != player.hands[hand_index][1]): 
+            player_move = basic_strategy_hard[player.hand_sums[hand_index]][game.dealer_face_card]
+        elif (not 11 in player.hands[hand_index]) and (player.hands[hand_index][0] == player.hands[hand_index][1]):
+            player_move = basic_strategy_pairs[player.hands[hand_index][0]][game.dealer_face_card]
+        else:
+            player_move = basic_strategy_soft[player.hand_sums[hand_index]][game.dealer_face_card]
     else:
-        player_move = basic_strategy_soft[player.hand_sums[hand_index]][game.dealer_face_card]
+        player_move = "S"
 
     return player_move
