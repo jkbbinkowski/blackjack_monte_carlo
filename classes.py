@@ -58,6 +58,7 @@ class Player:
         self.strategy = [x.strip() for x in config['PLAYERS']['STRATEGIES'].split(',')][idx]
         self.surrender = False
         self.move_history = []
+        self.result = Result()
 
     def place_new_bet(self):
         ### HERE MAKE DIFFERENT BETTING STRATEGIES FOR DIFFERENT PLAYERS (NOW IS SIMPLY MINIMAL BET)
@@ -69,10 +70,14 @@ class Player:
             raise ValueError("Bet is greater than capital")
 
     def add_card(self, card, hand_idx=0):
-        if (card == 11) and ((self.hand_sums[hand_idx] + card) > 21):
-            card = 1
         self.hands[hand_idx].append(card)
-        self.hand_sums[hand_idx] += card
+        self.hand_sums[hand_idx] = sum(self.hands[hand_idx])
+        if ((self.hand_sums[hand_idx]) > 21):
+            for idx, card in enumerate(self.hands[hand_idx]):
+                if card == 11:
+                    self.hands[hand_idx][idx] = 1
+                    self.hand_sums[hand_idx] -= 10
+                    break
 
     def hit(self, game, hand_idx=0):
         self.add_card(game.stack.pop(), hand_idx=hand_idx)
@@ -89,10 +94,41 @@ class Player:
     def split(self, game, hand_idx=0):
         self.hands.append([self.hands[hand_idx].pop()])
         self.hand_sums.append(0)
-        self.bets.append(self.bets[hand_idx])
-        self.capital -= self.bets[hand_idx]
-        self.hit(game, hand_idx=hand_idx)
-        self.hit(game, hand_idx=hand_idx+1)
+        self.place_new_bet()
+        self.add_card(game.stack.pop(), hand_idx=hand_idx)
+        self.add_card(game.stack.pop(), hand_idx=hand_idx+1)
+
+    def evaluate_score(self, game):
+        if self.surrender:
+            self.capital += self.bets[0] / 2
+            self.result.generate('Surrender', self, game, hand_idx=0)
+        else:
+            for hand_idx in range(len(self.hands)):
+                # Check for player blackjack (only if dealer doesn't also have blackjack)
+                if (10 in self.hands[hand_idx]) and (11 in self.hands[hand_idx]) and (not game.dealer.check_blackjack()) and (self.hand_sums[hand_idx] == 21):
+                    self.capital += self.bets[hand_idx] * 2.5
+                    self.result.generate('Blackjack', self, game, hand_idx=hand_idx)
+                elif self.hand_sums[hand_idx] > 21:
+                    # Player busted
+                    self.capital -= self.bets[hand_idx]
+                    self.result.generate('Loss', self, game, hand_idx=hand_idx)
+                elif game.dealer.hand_sum > 21:
+                    # Dealer busted, player wins (only if player didn't bust)
+                    self.capital += self.bets[hand_idx] * 2
+                    self.result.generate('Win', self, game, hand_idx=hand_idx)
+                elif self.hand_sums[hand_idx] > game.dealer.hand_sum:
+                    # Player has higher score
+                    self.capital += self.bets[hand_idx] * 2
+                    self.result.generate('Win', self, game, hand_idx=hand_idx)
+                elif self.hand_sums[hand_idx] == game.dealer.hand_sum:
+                    # Push
+                    self.capital += self.bets[hand_idx]
+                    self.result.generate('Push', self, game, hand_idx=hand_idx)
+                else:
+                    # Dealer has higher score
+                    self.capital -= self.bets[hand_idx]
+                    self.result.generate('Loss', self, game, hand_idx=hand_idx)
+        return self.result.__dict__()
 
 
 class Dealer:
@@ -102,11 +138,78 @@ class Dealer:
 
     def add_card(self, card, hand_idx=0):
         self.hand.append(card)
-        if (card == 11) and ((self.hand_sum + card) > 21):
-            card = 1
-        self.hand_sum += card
+        self.hand_sum = sum(self.hand)
+        if ((self.hand_sum) > 21):
+            for idx, card in enumerate(self.hand):
+                if card == 11:
+                    self.hand[idx] = 1
+                    self.hand_sum -= 10
+                    break
 
     def check_blackjack(self):
-        if self.hand_sum == 21:
+        if (10 in self.hand) and (11 in self.hand):
             return True
         return False
+
+    def play(self, game):
+        while (self.hand_sum < 17):
+            self.add_card(game.stack.pop())
+        if int(config['DEALER']['HIT_ON_SOFT_17']) == 1 and (11 in self.hand) and (self.hand_sum == 17):
+            self.add_card(game.stack.pop())
+
+
+class Result:
+    def __init__(self):
+        self.type = None
+        self.player = None
+        self.game = None
+        self.hand_idx = 0
+
+    def __dict__(self):
+        if config['SIMULATION']['RESULT_OUTPUT'] == 'full':
+            if self.type == 'Blackjack':
+                profit = self.player.bets[self.hand_idx] * 2.5
+            elif self.type == 'Win':
+                profit = self.player.bets[self.hand_idx] * 2
+            elif self.type == 'Loss':
+                profit = -self.player.bets[self.hand_idx]
+            elif self.type == 'Surrender':
+                profit = -self.player.bets[0] / 2
+            else:
+                profit = 0
+
+            return {
+                'type': self.type,
+                'profit': profit,
+                'hand_idx': self.hand_idx,
+                'hands': self.player.hands,
+                'hand_sums': self.player.hand_sums,
+                'move_history': self.player.move_history,
+                'bets': self.player.bets,
+                'capital': self.player.capital,
+                'strategy': self.player.strategy,
+                'dealer_face_card': self.game.dealer_face_card,
+                'dealer_hand': self.game.dealer.hand,
+                'dealer_hand_sum': self.game.dealer.hand_sum
+            }
+        elif config['SIMULATION']['RESULT_OUTPUT'] == 'basic':
+            return {
+                'type': self.type,
+                'hands': self.player.hands,
+                'hand_sums': self.player.hand_sums,
+                'dealer_hand': self.game.dealer.hand,
+                'dealer_hand_sum': self.game.dealer.hand_sum
+            }
+        elif config['SIMULATION']['RESULT_OUTPUT'] == 'minimal':
+            return {
+                'type': self.type
+            }
+        else:
+            raise ValueError("Invalid result output")
+
+    def generate(self, type, player, game, hand_idx=0):
+        self.type = type
+        self.player = player
+        self.game = game
+        self.hand_idx = hand_idx
+        return self.__dict__()

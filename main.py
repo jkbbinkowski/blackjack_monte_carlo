@@ -1,6 +1,7 @@
 import configparser
 import classes
 import strategies
+import json
 
 
 config = configparser.ConfigParser()
@@ -28,9 +29,14 @@ for i in range(int(config['SIMULATION']['AMOUNT'])):
     if not game.dealer.check_blackjack():
         for player in players:
             strategies.play_default(game, player)
-            print(f"Player {player.idx} hands: {player.hands}")
-            print(f"Player {player.idx} hand sums: {player.hand_sums}")
-            print(f"Player {player.idx} move history: {player.move_history}")
+        
+        game.dealer.play(game)
+        print(f"Dealer hand: {game.dealer.hand}")
+        print(f"Dealer hand sum: {game.dealer.hand_sum}")
+
+        for player in players:
+            score = player.evaluate_score(game)
+            print(f"Player {player.idx} score: {json.dumps(score)}")
     else:
         print("Dealer has blackjack")
         ### IN CASE OF DEALER BLACKJACK

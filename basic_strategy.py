@@ -55,14 +55,19 @@ def play(game, player):
                 player.move_history.append(player_move)
                 player_move = decide_move(player, game, hand_index)
             elif "D" in player_move:
-                if len(player.move_history) == 0:
+                if len(player.hands[hand_index]) == 2:
                     player.double_down(game, hand_index)
                     player.move_history.append(player_move)
                     player_move = "S"
                 else:
                     player_move = player_move.replace("D", "").capitalize()
-                    player.move_history.append(player_move)
-                    player_move = decide_move(player, game, hand_index)
+                    if player_move == "H":
+                        player.hit(game, hand_index)
+                        player.move_history.append(player_move)
+                        player_move = decide_move(player, game, hand_index)
+                    elif player_move == "S":
+                        player.move_history.append(player_move)
+                        player_move = "S"
             elif "SP" in player_move:
                 player.split(game, hand_index)
                 player.move_history.append(player_move)
@@ -75,8 +80,13 @@ def play(game, player):
                     player_move = "S"
                 else:
                     player_move = player_move.replace("U", "").capitalize()
-                    player.move_history.append(player_move)
-                    player_move = decide_move(player, game, hand_index)
+                    if player_move == "H":
+                        player.hit(game, hand_index)
+                        player.move_history.append(player_move)
+                        player_move = decide_move(player, game, hand_index)
+                    elif player_move == "S":
+                        player.move_history.append(player_move)
+                        player_move = "S"
         hand_index += 1
 
 
