@@ -35,18 +35,42 @@ class Game:
 
     def add_player(self, player):
         self.players.update({player.idx: player})
-    
+
+    def put_back(self, cards):
+        self.passive_cards.extend(cards)
+
+    def deal_initial_cards(self):
+        for i in range(2):
+            for player in self.players:
+                player.add_card(self.stack.pop(), 0)
+            self.dealer.add_card(self.stack.pop(), 0)
+
 
 class Player:
     def __init__(self, idx):
         self.idx = idx
         self.hands = []
         self.bets = []
-        self.capital = list(config['PLAYERS']['CAPITALS'])[idx]
+        self.capital = int([x.strip() for x in config['PLAYERS']['CAPITALS'].split(',')][idx])
+        self.card_sum = 0
+
+    def place_bet(self):
+        ### HERE MAKE DIFFERENT BETTING STRATEGIES FOR DIFFERENT PLAYERS (NOW IS SIMPLY MINIMAL BET)
+        bet = int(config['GAME']['MIN_BET'])
+        if bet < self.capital:
+            self.capital -= bet
+            self.bets.append(bet)
+        else:
+            raise ValueError("Bet is greater than capital")
+
+    def add_card(self, card, hand_idx):
+        self.hands[hand_idx].append(card)
+        if (card == 11) and ((self.card_sum + card) > 21):
+            card = 1
+        self.card_sum += card
 
 
 class Dealer:
     def __init__(self):
         self.hand = []
         self.card_sum = 0
-
