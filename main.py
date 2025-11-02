@@ -29,7 +29,7 @@ for i in range(int(config['SIMULATION']['AMOUNT'])):
     # Deal initial cards
     game.deal_initial_cards()
 
-    # CHeck if dealer has blackjack
+    # Check if dealer has blackjack
     if not game.dealer.check_blackjack():
         # If dealer doesn't have blackjack, play the game for each playet
         for player in players:
