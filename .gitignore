@@ -1,1 +1,17 @@
+# Pliki kompilacji Pythona
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Wirtualne środowiska
+.venv/
+env/
+
+# Dane robocze
+*.log
+*.csv
 *.xlsx
+
+# Pliki systemowe
+.DS_Store
+Thumbs.db
