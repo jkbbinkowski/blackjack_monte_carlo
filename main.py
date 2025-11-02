@@ -2,6 +2,7 @@ import configparser
 import classes
 import strategies
 import json
+import tqdm
 
 
 config = configparser.ConfigParser()
@@ -26,7 +27,7 @@ if config['SIMULATION']['RESULT_OUTPUT'] == 'excel':
     classes.Result.reset_round()
 
 # Run simulation
-for i in range(int(config['SIMULATION']['AMOUNT'])):
+for i in tqdm.tqdm(range(int(config['SIMULATION']['AMOUNT']))):
     # Increment round counter for Excel export
     if config['SIMULATION']['RESULT_OUTPUT'] == 'excel':
         classes.Result.increment_round()
