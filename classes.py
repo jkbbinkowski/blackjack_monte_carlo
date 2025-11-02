@@ -141,7 +141,6 @@ class Player:
                     self.capital += self.bets[hand_idx]
                     self.result.generate('Push', self, game, hand_idx)
                 else:
-                    # Dealer has higher score
                     self.result.generate('Loss', self, game, hand_idx)
         return self.result.__dict__()
 
@@ -206,9 +205,9 @@ class Result:
     def _calculate_profit(self, idx):
         """Calculate profit for a specific hand index"""
         if self.type == 'Blackjack':
-            return self.player.bets[idx] * 2.5
+            return self.player.bets[idx] * 1.5
         elif self.type == 'Win':
-            return self.player.bets[idx] * 2
+            return self.player.bets[idx]
         elif self.type == 'Loss':
             return -self.player.bets[idx]
         elif self.type == 'Surrender':
@@ -229,7 +228,8 @@ class Result:
             'hand': str(self.player.hands[hand_idx]),
             'hand_sum': self.player.hand_sums[hand_idx],
             'bet': self.player.bets[hand_idx],
-            'capital': self.player.capital,
+            'capital_before': self.player.capital - profit,
+            'capital_after': self.player.capital,
             'strategy': self.player.strategy,
             'move_history': str(self.player.move_history),
             'dealer_face_card': self.game.dealer_face_card,
@@ -248,9 +248,10 @@ class Result:
                 'hand': str(self.player.hands),
                 'hand_sum': str(self.player.hand_sums),
                 'bet': str(self.player.bets),
-                'capital': self.player.capital,
-                'strategy': self.player.strategy,
-                'move_history': str(self.player.move_history),
+                'capital_before': None,
+                'capital_after': None,
+                'strategy': None,
+                'move_history': None,
                 'dealer_face_card': self.game.dealer_face_card,
                 'dealer_hand': str(self.game.dealer.hand),
                 'dealer_hand_sum': self.game.dealer.hand_sum,
@@ -270,7 +271,8 @@ class Result:
                     'hand_sum': self.player.hand_sums[idx],
                     'move_history': self.player.move_history,
                     'bets': self.player.bets,
-                    'capital': self.player.capital,
+                    'capital_before': self.player.capital + self.player.bets[idx],
+                    'capital_after': self.player.capital,
                     'strategy': self.player.strategy,
                     'dealer_face_card': self.game.dealer_face_card,
                     'dealer_hand': self.game.dealer.hand,
@@ -285,7 +287,8 @@ class Result:
                     'hand_sum': self.player.hand_sums[idx],
                     'move_history': self.player.move_history,
                     'bets': self.player.bets,
-                    'capital': self.player.capital,
+                    'capital_before': self.player.capital + sum(self.player.bets),
+                    'capital_after': self.player.capital,
                     'strategy': self.player.strategy,
                     'dealer_face_card': self.game.dealer_face_card,
                     'dealer_hand': self.game.dealer.hand,
