@@ -59,10 +59,6 @@ for i in range(int(config['SIMULATION']['AMOUNT'])):
                 print(f"Player {player.idx} score: {json.dumps(score)}")
 
     game.prepare_for_next_round()
-    if config['SIMULATION']['RESULT_OUTPUT'] != 'excel':
-        print(f"Stack: {len(game.stack)}")
-        print(f"Passive cards: {len(game.passive_cards)}")
-        print('\n')
 
 # Save to Excel if excel mode is enabled
 if config['SIMULATION']['RESULT_OUTPUT'] == 'excel':

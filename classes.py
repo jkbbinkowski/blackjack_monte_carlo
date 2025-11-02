@@ -231,13 +231,32 @@ class Result:
                 'hand': str(self.player.hands[idx]),
                 'hand_sum': self.player.hand_sums[idx],
                 'bet': self.player.bets[idx],
-                'total_bet': sum(self.player.bets),
                 'capital': self.player.capital,
                 'strategy': self.player.strategy,
                 'move_history': str(self.player.move_history),
                 'dealer_face_card': self.game.dealer_face_card,
                 'dealer_hand': str(self.game.dealer.hand),
-                'dealer_hand_sum': self.game.dealer.hand_sum
+                'dealer_hand_sum': self.game.dealer.hand_sum,
+            }
+            total_profit += profit
+            rows.append(row)
+            
+        if len(self.player.hands) > 1:
+            row = {
+                'round': round_num,
+                'player_idx': self.player.idx,
+                'hand_idx': "Total after split",
+                'type': None,
+                'profit': total_profit,
+                'hand': str(self.player.hands),
+                'hand_sum': str(self.player.hand_sums),
+                'bet': str(self.player.bets),
+                'capital': self.player.capital,
+                'strategy': self.player.strategy,
+                'move_history': str(self.player.move_history),
+                'dealer_face_card': self.game.dealer_face_card,
+                'dealer_hand': str(self.game.dealer.hand),
+                'dealer_hand_sum': self.game.dealer.hand_sum,
             }
             rows.append(row)
         return rows
