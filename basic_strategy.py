@@ -100,7 +100,8 @@ def decide_move(player, game, hand_index):
             if player.hand_sums[hand_index] == 12:
                 player.hands[hand_index] = [11, 11]
                 player_move = basic_strategy_pairs[player.hands[hand_index][0]][game.dealer_face_card]
-            player_move = basic_strategy_soft[player.hand_sums[hand_index]][game.dealer_face_card]
+            else:
+                player_move = basic_strategy_soft[player.hand_sums[hand_index]][game.dealer_face_card]
     else:
         player_move = "S"
 
