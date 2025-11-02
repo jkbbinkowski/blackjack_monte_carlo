@@ -30,10 +30,10 @@ class Game:
         self.dealer_face_card = None
         
     def shuffle(self):
+        self.passive_cards = [11 if x == 1 else x for x in self.passive_cards]
         self.stack.extend(self.passive_cards)
         self.passive_cards = []
         random.shuffle(self.stack)
-        print(f"Shuffling...")
 
     def add_player(self, player):
         self.players.append(player)
@@ -49,9 +49,6 @@ class Game:
                 player.add_card(self.stack.pop())
             self.dealer.add_card(self.stack.pop())
         self.dealer_face_card = self.dealer.hand[0]
-        print(f"Player 0 initial card: {self.players[0].hands}")
-        print(f"Dealer initial cards: {self.dealer.hand}")
-
 
     def prepare_for_next_round(self):
         for player in self.players:
@@ -94,7 +91,7 @@ class Player:
     def hit(self, game, hand_idx=0):
         self.add_card(game.stack.pop(), hand_idx=hand_idx)
 
-    def double_down(self, game, hand_idx=0):
+    def double_down(self, game, hand_idx):
         if self.bets[hand_idx] <= self.capital:
             self.capital -= self.bets[hand_idx]
             self.bets[hand_idx] *= 2
@@ -103,12 +100,22 @@ class Player:
 
         self.hit(game, hand_idx=hand_idx)
 
-    def split(self, game, hand_idx=0):
-        self.hands.append([self.hands[hand_idx].pop()])
-        self.hand_sums.append(0)
+    def split(self, game, hand_idx):
+        print(f"Hand before split: {self.hands[hand_idx]}")
+        print(f"Hand sum before split: {self.hand_sums[hand_idx]}")
+        print(game.stack)
         self.place_new_bet()
-        self.add_card(game.stack.pop(), hand_idx=hand_idx)
-        self.add_card(game.stack.pop(), hand_idx=hand_idx+1)
+        self.hands.append([self.hands[hand_idx].pop()])
+        if self.hands[hand_idx][0] == 1:
+            self.hands[hand_idx][0] = 11
+        if self.hands[hand_idx+1][0] == 1:
+            self.hands[hand_idx+1][0] = 11
+        self.hand_sums[hand_idx] = self.hands[hand_idx][0]
+        self.hand_sums.append(self.hands[hand_idx+1][0])
+        self.add_card(game.stack.pop(), hand_idx)
+        self.add_card(game.stack.pop(), len(self.hands)-1)
+        print(f"Hand after split: {self.hands}")
+        print(f"Hand sum after split: {self.hand_sums}")
 
     def evaluate_score(self, game):
         if self.surrender:
@@ -119,27 +126,27 @@ class Player:
                 # Check for player blackjack (only if dealer doesn't also have blackjack)
                 if (10 in self.hands[hand_idx]) and (11 in self.hands[hand_idx]) and (not game.dealer.check_blackjack()) and (self.hand_sums[hand_idx] == 21):
                     self.capital += self.bets[hand_idx] * 2.5
-                    self.result.generate('Blackjack', self, game, hand_idx=hand_idx)
+                    self.result.generate('Blackjack', self, game, hand_idx)
                 elif self.hand_sums[hand_idx] > 21:
                     # Player busted
                     self.capital -= self.bets[hand_idx]
-                    self.result.generate('Loss', self, game, hand_idx=hand_idx)
+                    self.result.generate('Loss', self, game, hand_idx)
                 elif game.dealer.hand_sum > 21:
                     # Dealer busted, player wins (only if player didn't bust)
                     self.capital += self.bets[hand_idx] * 2
-                    self.result.generate('Win', self, game, hand_idx=hand_idx)
+                    self.result.generate('Win', self, game, hand_idx)
                 elif self.hand_sums[hand_idx] > game.dealer.hand_sum:
                     # Player has higher score
                     self.capital += self.bets[hand_idx] * 2
-                    self.result.generate('Win', self, game, hand_idx=hand_idx)
+                    self.result.generate('Win', self, game, hand_idx)
                 elif self.hand_sums[hand_idx] == game.dealer.hand_sum:
                     # Push
                     self.capital += self.bets[hand_idx]
-                    self.result.generate('Push', self, game, hand_idx=hand_idx)
+                    self.result.generate('Push', self, game, hand_idx)
                 else:
                     # Dealer has higher score
                     self.capital -= self.bets[hand_idx]
-                    self.result.generate('Loss', self, game, hand_idx=hand_idx)
+                    self.result.generate('Loss', self, game, hand_idx)
         return self.result.__dict__()
 
     def prepare_for_next_round(self):
@@ -252,7 +259,7 @@ class Result:
                 'type': self.type
             }
 
-    def generate(self, type, player, game, hand_idx=0):
+    def generate(self, type, player, game, hand_idx):
         self.type = type
         self.player = player
         self.game = game

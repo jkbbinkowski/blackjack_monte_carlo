@@ -51,5 +51,6 @@ for i in range(int(config['SIMULATION']['AMOUNT'])):
     game.prepare_for_next_round()
     print(f"Stack: {len(game.stack)}")
     print(f"Passive cards: {len(game.passive_cards)}")
+    print('\n')
         
     
