@@ -58,7 +58,7 @@ def play(game, player):
                 if len(player.move_history) == 0:
                     player.double_down(game, hand_index)
                     player.move_history.append(player_move)
-                    player_move = decide_move(player, game, hand_index)
+                    player_move = "S"
                 else:
                     player_move = player_move.replace("D", "").capitalize()
                     player.move_history.append(player_move)
@@ -66,9 +66,17 @@ def play(game, player):
             elif "SP" in player_move:
                 player.split(game, hand_index)
                 player.move_history.append(player_move)
-                player_move = decide_move(player, game, hand_index)
+                hand_index = -1
+                player_move = "S"
             elif "U" in player_move:
-                player.surrender = True
+                if len(player.move_history) == 0:
+                    player.surrender = True
+                    player.move_history.append(player_move)
+                    player_move = "S"
+                else:
+                    player_move = player_move.replace("U", "").capitalize()
+                    player.move_history.append(player_move)
+                    player_move = decide_move(player, game, hand_index)
         hand_index += 1
 
 
@@ -76,9 +84,12 @@ def decide_move(player, game, hand_index):
     if player.hand_sums[hand_index] <= 21:
         if (not 11 in player.hands[hand_index]) and (player.hands[hand_index][0] != player.hands[hand_index][1]): 
             player_move = basic_strategy_hard[player.hand_sums[hand_index]][game.dealer_face_card]
-        elif (not 11 in player.hands[hand_index]) and (player.hands[hand_index][0] == player.hands[hand_index][1]):
+        elif (player.hands[hand_index][0] == player.hands[hand_index][1]):
             player_move = basic_strategy_pairs[player.hands[hand_index][0]][game.dealer_face_card]
         else:
+            if player.hand_sums[hand_index] == 12:
+                player.hands[hand_index] = [11, 11]
+                player_move = basic_strategy_pairs[player.hands[hand_index][0]][game.dealer_face_card]
             player_move = basic_strategy_soft[player.hand_sums[hand_index]][game.dealer_face_card]
     else:
         player_move = "S"

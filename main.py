@@ -27,11 +27,11 @@ for i in range(int(config['SIMULATION']['AMOUNT'])):
     print(f"Dealer face card: {game.dealer_face_card}")
     if not game.dealer.check_blackjack():
         for player in players:
-            strategies.play(game, player)
+            strategies.play_default(game, player)
             print(f"Player {player.idx} hands: {player.hands}")
             print(f"Player {player.idx} hand sums: {player.hand_sums}")
             print(f"Player {player.idx} move history: {player.move_history}")
     else:
-        pass
+        print("Dealer has blackjack")
         ### IN CASE OF DEALER BLACKJACK
     
