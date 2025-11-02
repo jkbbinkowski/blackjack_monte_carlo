@@ -22,22 +22,30 @@ for player in players:
 
 # Run simulation
 for i in range(int(config['SIMULATION']['AMOUNT'])):
+    # Place bets before play
     for player in players:
         player.place_new_bet()
+
+    # Deal initial cards
     game.deal_initial_cards()
-    print(f"Dealer face card: {game.dealer_face_card}")
+
+    # CHeck if dealer has blackjack
     if not game.dealer.check_blackjack():
+        # If dealer doesn't have blackjack, play the game for each playet
         for player in players:
             strategies.play_default(game, player)
         
+        # Dealer plays
         game.dealer.play(game)
-        print(f"Dealer hand: {game.dealer.hand}")
-        print(f"Dealer hand sum: {game.dealer.hand_sum}")
 
+        # Evaluate scores
         for player in players:
             score = player.evaluate_score(game)
             print(f"Player {player.idx} score: {json.dumps(score)}")
     else:
-        print("Dealer has blackjack")
-        ### IN CASE OF DEALER BLACKJACK
+        # If dealer has blackjack, evaluate scores
+        for player in players:
+            score = player.evaluate_score(game)
+            print(f"Player {player.idx} score: {json.dumps(score)}")
+        
     

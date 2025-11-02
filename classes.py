@@ -167,43 +167,66 @@ class Result:
 
     def __dict__(self):
         if config['SIMULATION']['RESULT_OUTPUT'] == 'full':
-            if self.type == 'Blackjack':
-                profit = self.player.bets[self.hand_idx] * 2.5
-            elif self.type == 'Win':
-                profit = self.player.bets[self.hand_idx] * 2
-            elif self.type == 'Loss':
-                profit = -self.player.bets[self.hand_idx]
-            elif self.type == 'Surrender':
-                profit = -self.player.bets[0] / 2
-            else:
-                profit = 0
-
-            return {
-                'type': self.type,
-                'profit': profit,
-                'hand_idx': self.hand_idx,
-                'hands': self.player.hands,
-                'hand_sums': self.player.hand_sums,
-                'move_history': self.player.move_history,
-                'bets': self.player.bets,
-                'capital': self.player.capital,
-                'strategy': self.player.strategy,
-                'dealer_face_card': self.game.dealer_face_card,
-                'dealer_hand': self.game.dealer.hand,
-                'dealer_hand_sum': self.game.dealer.hand_sum
-            }
+            result = {}
+            for idx, hand in enumerate(self.player.hands):
+                if self.type == 'Blackjack':
+                    profit = self.player.bets[idx] * 2.5
+                elif self.type == 'Win':
+                    profit = self.player.bets[idx] * 2
+                elif self.type == 'Loss':
+                    profit = -self.player.bets[idx]
+                elif self.type == 'Surrender':
+                    profit = -self.player.bets[0] / 2
+                else:
+                    profit = 0
+                result.update({f'hand_{idx}': {
+                    'type': self.type,
+                    'profit': profit,
+                    'hand_idx': self.hand_idx,
+                    'hands': self.player.hands,
+                    'hand_sums': self.player.hand_sums,
+                    'move_history': self.player.move_history,
+                    'bets': self.player.bets,
+                    'capital': self.player.capital,
+                    'strategy': self.player.strategy,
+                    'dealer_face_card': self.game.dealer_face_card,
+                    'dealer_hand': self.game.dealer.hand,
+                    'dealer_hand_sum': self.game.dealer.hand_sum
+                }
+            })
+            if len(self.player.hands) > 1:
+                result.update({'total': {
+                    'type': self.type,
+                    'profit': profit,
+                    'hand_idx': self.hand_idx,
+                    'hands': self.player.hands,
+                    'hand_sums': self.player.hand_sums,
+                    'move_history': self.player.move_history,
+                    'bets': self.player.bets,
+                    'capital': self.player.capital,
+                    'strategy': self.player.strategy,
+                    'dealer_face_card': self.game.dealer_face_card,
+                    'dealer_hand': self.game.dealer.hand,
+                    'dealer_hand_sum': self.game.dealer.hand_sum
+                }})
+            return result
         elif config['SIMULATION']['RESULT_OUTPUT'] == 'basic':
-            return {
-                'type': self.type,
-                'hands': self.player.hands,
-                'hand_sums': self.player.hand_sums,
-                'dealer_hand': self.game.dealer.hand,
-                'dealer_hand_sum': self.game.dealer.hand_sum
-            }
+            result = {}
+            for idx, hand in enumerate(self.player.hands):
+                result[f'hand_{idx}'] = {
+                    'type': self.type,
+                    'cards': hand,
+                    'sum': self.player.hand_sums[idx],
+                }
+            return result
         elif config['SIMULATION']['RESULT_OUTPUT'] == 'minimal':
-            return {
-                'type': self.type
-            }
+            result = {}
+            for idx, hand in enumerate(self.player.hands):
+                result[f'hand_{idx}'] = {
+                    'cards': hand,
+                    'sum': self.player.hand_sums[idx],
+                }
+            return result
         else:
             raise ValueError("Invalid result output")
 
