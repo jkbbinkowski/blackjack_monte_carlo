@@ -142,7 +142,6 @@ class Player:
                     self.result.generate('Push', self, game, hand_idx)
                 else:
                     # Dealer has higher score
-                    self.capital -= self.bets[hand_idx]
                     self.result.generate('Loss', self, game, hand_idx)
         return self.result.__dict__()
 
@@ -217,37 +216,35 @@ class Result:
         else:
             return 0
 
-    def _to_excel_row(self, round_num):
+    def _to_excel_row(self, round_num, hand_idx):
         """Convert result to Excel row format"""
         rows = []
-        for idx, hand in enumerate(self.player.hands):
-            profit = self._calculate_profit(idx)
-            row = {
-                'round': round_num,
-                'player_idx': self.player.idx,
-                'hand_idx': idx,
-                'type': self.type,
-                'profit': profit,
-                'hand': str(self.player.hands[idx]),
-                'hand_sum': self.player.hand_sums[idx],
-                'bet': self.player.bets[idx],
-                'capital': self.player.capital,
-                'strategy': self.player.strategy,
-                'move_history': str(self.player.move_history),
-                'dealer_face_card': self.game.dealer_face_card,
-                'dealer_hand': str(self.game.dealer.hand),
-                'dealer_hand_sum': self.game.dealer.hand_sum,
-            }
-            total_profit += profit
-            rows.append(row)
+        profit = self._calculate_profit(hand_idx)
+        row = {
+            'round': round_num,
+            'player_idx': self.player.idx,
+            'hand_idx': hand_idx,
+            'type': self.type,
+            'profit': profit,
+            'hand': str(self.player.hands[hand_idx]),
+            'hand_sum': self.player.hand_sums[hand_idx],
+            'bet': self.player.bets[hand_idx],
+            'capital': self.player.capital,
+            'strategy': self.player.strategy,
+            'move_history': str(self.player.move_history),
+            'dealer_face_card': self.game.dealer_face_card,
+            'dealer_hand': str(self.game.dealer.hand),
+            'dealer_hand_sum': self.game.dealer.hand_sum,
+        }
+        rows.append(row)
             
-        if len(self.player.hands) > 1:
+        if len(self.player.hands) > 1 and hand_idx == (len(self.player.hands) - 1):
             row = {
                 'round': round_num,
                 'player_idx': self.player.idx,
-                'hand_idx': "Total after split",
+                'hand_idx': "Total",
                 'type': None,
-                'profit': total_profit,
+                'profit': None,
                 'hand': str(self.player.hands),
                 'hand_sum': str(self.player.hand_sums),
                 'bet': str(self.player.bets),
@@ -321,7 +318,7 @@ class Result:
         
         # If excel mode, add rows to the collection
         if config['SIMULATION']['RESULT_OUTPUT'] == 'excel':
-            rows = self._to_excel_row(Result.current_round)
+            rows = self._to_excel_row(Result.current_round, hand_idx)
             Result.all_results.extend(rows)
         
         return result_dict
