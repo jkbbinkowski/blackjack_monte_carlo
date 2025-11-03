@@ -1,4 +1,19 @@
+Opis dla config [GAME]
+    - MAX_DOUBLE_DOWN_SUM - maksymalna suma kart, dla których można zrobić double down (zakres do 21, oznacza ze aż do blackjack można podwajać)
+    - DOUBLE_AFTER_SPLIT - czy można podwajać po split
+    - DOUBLE_AFTER_FIRST_HIT - czy można podwajać po doborze jednej karty
+    - MAX_SPLIT_AMOUNT - ile razy wolno dzielić pary.
+    - RESPLIT_ACES - jeżeli po podzieleniu pary asów jedna z par znowu będzie parą A-A, to czy można ponownie rozdzielić aż do limitu max_split_amount. (standard = 0)
+    - PLAY_SPLIT_ACES - czy można grać po rozdzieleniu asów (jeżeli False, gracz otrzymuje jedną kartę (czyli ma 2 na parę) i gra się kończy (standard = 0))
+    - BLACKJACK_AFTER_SPLIT_COUNTS_AS_21 - po rozdzieleniu jeżeli dostaje się A-10, NIE liczy się to jako blackjack (standard = 1)
+    - ALLOW_SPLIT_TENS - czy można rozdzielać pary o wartośći 10 (np. 10-10, K-K) (standard = 1)
+
+Opcje dla config [GAME][SURRENDER_TYPE]
+    - none - poddanie niemożliwe
+    - early - wczesne poddanie, zanim dealer sprawdzi czy ma bj
+    - late - można się poddać, o ile dealer nie ma blackjacka (standard)
+
 Opcje dla config [DEALER][HOLE_CARD]
-    - peek - gdy dealer ma A/10, sprawdza czy ma BJ. Jeżeli tak, gra sie kończy
-    - no_peek_obo - dealer nie sprawdza czy ma BJ, gra toczy sie dalej. Jeżeli się okaże, że ma, to traci się tylko zakład pierwotny (ew. split, double down nie jest tracony)
+    - peek - gdy dealer ma A/10, sprawdza czy ma BJ. Jeżeli ma, gra sie kończy. (standard)
+    - no_peek_obo - dealer nie sprawdza czy ma BJ, gra toczy sie dalej. Jeżeli się okaże że ma, to traci się tylko zakład pierwotny (ew. split, double down nie jest tracony)
     - no_peek_all - jak wyżej, tylko tracisz wszystko
