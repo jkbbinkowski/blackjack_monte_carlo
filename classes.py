@@ -114,8 +114,8 @@ class Player:
             for hand_idx in range(len(self.hands)):
                 # Check if player has natural blackjack 
                 if (self.hand_sums[hand_idx] == 21) and (len(self.hands[hand_idx]) == 2):
-                    if ((hand_idx == 0) or ((int(game.config['BLACKJACK_AFTER_SPLIT_COUNTS_AS_21']) == 0) and (hand_idx > 0))):
-                        print(f"Player {self.idx} has natural blackjack on hand {hand_idx}")
+                    # Check if natural blackjack is after split (config dependent)
+                    if ((hand_idx == 0) or (int(game.config['BLACKJACK_AFTER_SPLIT_COUNTS_AS_21']) == 0)):
                         self.capital += (self.bets[0] * (float(game.config['BLACKJACK_PAYOUT']) + 1))
                     
         
