@@ -37,7 +37,7 @@ for i in tqdm.tqdm(range(int(config['SIMULATION']['AMOUNT']))):
         # If dealer has blackjack, evaluate insurance and hand results
         for player in players:
             player.evaluate_insurance_result(game)
-            #player.evaluate_hand_result(game)
+            player.evaluate_hand_result(game)
     else:
         # Play hands and dealer hand if dealer does not have blackjack
         for player in players:
@@ -48,7 +48,7 @@ for i in tqdm.tqdm(range(int(config['SIMULATION']['AMOUNT']))):
 
         for player in players:
             player.evaluate_insurance_result(game)
-            #player.evaluate_hand_result(game)
+            player.evaluate_hand_result(game)
 
     # Clear hands
     game.clear_hands()
