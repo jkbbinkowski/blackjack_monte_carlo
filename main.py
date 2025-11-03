@@ -38,5 +38,19 @@ for i in tqdm.tqdm(range(int(config['SIMULATION']['AMOUNT']))):
     # Play dealer hand
     game.dealer.play_hand(game)
 
+    print(f"Dealer hand: {game.dealer.hand}")
+    print(f"Dealer hand sum: {game.dealer.hand_sum}")
+    print(f"Dealer counted hand sum: {game.dealer.counted_hand_sum}")
+    print(f"Dealer aces amount: {game.dealer.aces_amount}")
+    print(f"Dealer has soft hand: {game.dealer.has_soft_hand()}")
+    print(f"Dealer peek has blackjack: {game.dealer.peek_has_blackjack}")
+    print(f"Players hands: {players[0].hands}")
+    print(f"Players hand sums: {players[0].hand_sums}")
+    print(f"Players counted hand sums: {players[0].counted_hand_sums}")
+    print(f"Players aces amounts: {players[0].aces_amounts}")
+    print(f"Players has soft hand: {players[0].has_soft_hand(0)}")
+    print(f"Players move history: {players[0].move_history}")
+    print('\n')
+
     # Clear hands
     game.clear_hands()
