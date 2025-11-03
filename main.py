@@ -50,6 +50,8 @@ for i in tqdm.tqdm(range(int(config['SIMULATION']['AMOUNT']))):
         for player in players:
             player.evaluate_insurance_result(game)
             print(player.evaluate_hand_result(game))
+        
+    print('\n')
 
     # Clear hands
     game.clear_hands()

@@ -65,8 +65,8 @@ class Player:
         self.playing_strategy = [x.strip() for x in config['PLAYERS']['PLAYING_STRATEGIES'].split(',')][idx]
         self.betting_strategy = [x.strip() for x in config['PLAYERS']['BETTING_STRATEGIES'].split(',')][idx]
         self.insurance_strategy = [x.strip() for x in config['PLAYERS']['INSURANCE_STRATEGIES'].split(',')][idx]
-        self.capital = int([x.strip() for x in config['PLAYERS']['CAPITALS'].split(',')][idx])
         self.pre_game_capital = 0
+        self.capital = int([x.strip() for x in config['PLAYERS']['CAPITALS'].split(',')][idx])
         self.hands = [[]]
         self.bets = []
         self.double_down_bets = []
@@ -113,13 +113,14 @@ class Player:
 
     def evaluate_hand_result(self, game):
         # Check if player surrendered
+        round_results = []
         if self.surrender:
             self.capital += (self.bets[0]/2)
             self.round_result = "surrender"
-            return {"hand_0": dict(self.__dict__)}
-
+            round_results.append({"hand_0": dict(self.__dict__), "dealer": dict(game.dealer.__dict__)})
+            
+        round_results = []
         # Evaluate hands
-        round_results = {}
         for hand_idx in range(len(self.hands)):
             # Check if player busted
             if self.bust[hand_idx]:
@@ -140,7 +141,7 @@ class Player:
             elif self.counted_hand_sums[hand_idx] < game.dealer.counted_hand_sum:
                 self.round_result = "lose"
 
-            round_results.update({f"hand_{hand_idx}": dict(self.__dict__)})
+            round_results.append({f"hand_{hand_idx}": dict(self.__dict__), "dealer": dict(game.dealer.__dict__)})
         
         return round_results
             
