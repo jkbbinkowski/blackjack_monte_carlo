@@ -41,7 +41,7 @@ class Game:
         for i in range(2):
             for player in self.players:
                 player.add_card(self.stack.pop(), 0)
-            self.dealer.add_card(self.stack.pop(), 0)
+            self.dealer.add_card(self.stack.pop())
         self.dealer_face_card = self.dealer.hand[0]
 
     def clear_hands(self):
@@ -82,17 +82,28 @@ class Player:
 
 class Dealer:
     def __init__(self):
+        self.config = config['DEALER']
         self.hand = []
         self.hand_sum = 0
         self.has_blackjack = False
 
-    def add_card(self, card, hand_idx=0):
+    def add_card(self, card):
         self.hand.append(card)
         self.hand_sum = sum(self.hand)
+        if self.hand_sum > 21:
+            aces_amount = self.hand.count(11)
+            for i in range(aces_amount):
+                if self.hand_sum <= 21:
+                    break
+                else:
+                    self.hand_sum -= 10
 
     def check_blackjack(self):
         if (10 in self.hand) and (11 in self.hand):
             self.has_blackjack = True
+
+    def play_hand(self, game):
+        strategies.dealer_strategy(self, game)
         
     def clear_hands(self):
         self.hand = []

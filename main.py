@@ -31,8 +31,12 @@ for i in tqdm.tqdm(range(int(config['SIMULATION']['AMOUNT']))):
     # Check if dealer has blackjack
     game.dealer.check_blackjack()
 
+    # Play hands
     for player in players:
         player.play_hand(game)
+
+    # Play dealer hand
+    game.dealer.play_hand(game)
 
     # Clear hands
     game.clear_hands()
