@@ -22,8 +22,8 @@ for player in players:
 # Run simulation
 for i in tqdm.tqdm(range(int(config['SIMULATION']['AMOUNT']))):
     # Place bets before play
-    for player in players:
-        player.place_new_bet(game)
+    # for player in players:
+    #     player.place_new_bet(game)
 
     # Deal initial cards
     game.deal_initial_cards()

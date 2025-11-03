@@ -1,5 +1,11 @@
+import configparser
+
 from .betting_strategies import *
 from .playing_strategies import *
+
+
+config = configparser.ConfigParser()
+config.read('config.ini')
 
 
 def config_betting_strategy(player, game):
@@ -14,3 +20,7 @@ def config_playing_strategy(player, game):
         basic_strategy(player, game)
     else:
         raise ValueError("Invalid playing strategy")
+
+
+def config_dealer_strategy(dealer, game):
+    dealer_strategy(dealer, game, config['DEALER'])

@@ -110,7 +110,7 @@ class Dealer:
             self.has_blackjack = True
 
     def play_hand(self, game):
-        strategies.dealer_strategy(self, game)
+        strategies.config_dealer_strategy(self, game)
         
     def clear_hands(self):
         self.hand = []
