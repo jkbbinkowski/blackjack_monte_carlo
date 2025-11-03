@@ -48,7 +48,8 @@ class Game:
         for i in range(2):
             for player in self.players:
                 player.add_card(self.stack.pop(), 0)
-            self.dealer.add_card(self.stack.pop())
+            if ("american" in self.dealer.config["HOLE_CARD"]) or (("european" in self.dealer.config["HOLE_CARD"]) and (i == 0)):
+                self.dealer.add_card(self.stack.pop())
         self.dealer_face_card = self.dealer.hand[0]
 
     def clear_hands(self):
@@ -60,14 +61,14 @@ class Game:
 class Player:
     def __init__(self, idx):
         self.idx = idx
+        self.playing_strategy = [x.strip() for x in config['PLAYERS']['PLAYING_STRATEGIES'].split(',')][idx]
+        self.betting_strategy = [x.strip() for x in config['PLAYERS']['BETTING_STRATEGIES'].split(',')][idx]
+        self.capital = int([x.strip() for x in config['PLAYERS']['CAPITALS'].split(',')][idx])
         self.hands = [[]]
         self.bets = []
-        self.capital = int([x.strip() for x in config['PLAYERS']['CAPITALS'].split(',')][idx])
         self.hand_sums = [0]
         self.counted_hand_sums = [0]
         self.aces_amounts = [0]
-        self.playing_strategy = [x.strip() for x in config['PLAYERS']['PLAYING_STRATEGIES'].split(',')][idx]
-        self.betting_strategy = [x.strip() for x in config['PLAYERS']['BETTING_STRATEGIES'].split(',')][idx]
         self.surrender = False
         self.move_history = []
 
@@ -119,17 +120,20 @@ class Dealer:
 
     def peek(self):
         if self.config["HOLE_CARD"] == "american_peek":
-            if (10 in self.hand) and (11 in self.hand):
+            if ((10 in self.hand) and (11 in self.hand)):
                 self.peek_has_blackjack = True
         elif self.config["HOLE_CARD"] == "american_peek_ace_only":
             if (self.hand[0] == 11) and (self.hand[1] == 10):
                 self.peek_has_blackjack = True
 
     def play_hand(self, game):
+        if "european" in self.config["HOLE_CARD"]:
+            self.add_card(game.stack.pop())
         strategies.config_dealer_strategy(self, game)
         
     def clear_hands(self):
         self.hand = []
         self.hand_sum = 0
+        self.counted_hand_sum = 0
         self.aces_amount = 0
-        self.has_blackjack = False
+        self.peek_has_blackjack = False

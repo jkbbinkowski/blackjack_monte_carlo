@@ -28,8 +28,8 @@ for i in tqdm.tqdm(range(int(config['SIMULATION']['AMOUNT']))):
     # Deal initial cards
     game.deal_initial_cards()
 
-    # Check if dealer has blackjack
-    game.dealer.check_blackjack()
+    # Check if dealer has blackjack (peek according to config)
+    game.dealer.peek()
 
     # Play hands
     for player in players:

@@ -15,7 +15,14 @@ Opcje dla config [GAME][SURRENDER_TYPE]
     - early - wczesne poddanie, zanim dealer sprawdzi czy ma bj
     - late - można się poddać, o ile dealer nie ma blackjacka (standard)
 
-Opcje dla config [DEALER][HOLE_CARD] ### add dealing rules
+Opcje dla config [DEALER][HOLE_CARD]
     - american_peek - dealer otrzymuje na start hole_card (zakrytą) i sprawdza czy nie ma blackjacka przed ruchami graczy
     - american_peek_ace_only - jak wyżej tylko peek jest gdy odkrytą kartą jest as
-    - european_no_hole_card - dealer otrzymuje na start tylko jedną odkrytą kartę, drugą otrzymuje po ruchach wszystkich graczy
+    - european_no_hole_card - dealer otrzymuje na start tylko jedną odkrytą kartę, drugą otrzymuje po ruchach wszystkich graczy (gracz traci tylko zakład pierwotny w przypadku blackjacka)
+
+Opcje dla config[PLAYERS][BETTING_STRATEGIES]
+    - minimal_bet - za każdym razem stały bet równy minimalnemu MIN_BET
+
+Opcje dla config[PLAYERS][PLAYING_STRATEGIES]
+    - basic_strategy - gra tylko według basic strategy
+    - mimic_the_dealer - gry z uzyciem strategii dealera
