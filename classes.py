@@ -76,6 +76,7 @@ class Player:
         self.bust = [0]
         self.surrender = False
         self.insurance = False
+        self.round_result = None
         self.move_history = []
 
     def place_new_bet(self, game):
@@ -114,34 +115,35 @@ class Player:
         # Check if player surrendered
         if self.surrender:
             self.capital += (self.bets[0]/2)
-            return
-        else:
-            for hand_idx in range(len(self.hands)):
-                if self.bust[hand_idx]:
-                    continue
-                # Check if player hand is equal to dealer hand sum
-                elif (self.counted_hand_sums[hand_idx] <= 21 and self.counted_hand_sums[hand_idx] == game.dealer.counted_hand_sum):
-                    self.capital += (self.bets[hand_idx])
-                # Check if player has natural blackjack 
-                elif (self.counted_hand_sums[hand_idx] == 21) and (len(self.hands[hand_idx]) == 2):
-                    # Check if natural blackjack is after split (config dependent)
-                    if ((hand_idx == 0) or (int(game.config['BLACKJACK_AFTER_SPLIT_COUNTS_AS_21']) == 0)):
-                        self.capital += (self.bets[hand_idx] * (float(game.config['BLACKJACK_PAYOUT']) + 1))
-                elif (self.counted_hand_sums[hand_idx] > game.dealer.counted_hand_sum) or (game.dealer.bust):
-                    self.capital += (self.bets[hand_idx] * 2)
-                    print(f"Player {self.idx} wins on hand {hand_idx}")
-                    print(f"Capital before: {self.pre_game_capital}")
-                    print(f"Capital after: {self.capital}")
-                    print(f"Dealer hand: {game.dealer.hand}, counted hand sum: {game.dealer.counted_hand_sum}")
-                    print(f"Player hand: {self.hands[hand_idx]}, counted hand sum: {self.counted_hand_sums[hand_idx]}")
-                    print('\n')
-                elif self.counted_hand_sums[hand_idx] < game.dealer.counted_hand_sum:
-                    print(f"Player {self.idx} loses on hand {hand_idx}")
-                    print(f"Capital before: {self.pre_game_capital}")
-                    print(f"Capital after: {self.capital}")
-                    print(f"Dealer hand: {game.dealer.hand}, counted hand sum: {game.dealer.counted_hand_sum}")
-                    print(f"Player hand: {self.hands[hand_idx]}, counted hand sum: {self.counted_hand_sums[hand_idx]}")
-                    print('\n')
+            self.round_result = "surrender"
+            return {"hand_0": dict(self.__dict__)}
+
+        # Evaluate hands
+        round_results = {}
+        for hand_idx in range(len(self.hands)):
+            # Check if player busted
+            if self.bust[hand_idx]:
+                self.round_result = "bust"
+            # Check if player hand is equal to dealer hand sum
+            elif (self.counted_hand_sums[hand_idx] <= 21 and self.counted_hand_sums[hand_idx] == game.dealer.counted_hand_sum):
+                self.capital += (self.bets[hand_idx])
+                self.round_result = "push"
+            # Check if player has natural blackjack 
+            elif (self.counted_hand_sums[hand_idx] == 21) and (len(self.hands[hand_idx]) == 2):
+                # Check if natural blackjack is after split (config dependent)
+                if ((hand_idx == 0) or (int(game.config['BLACKJACK_AFTER_SPLIT_COUNTS_AS_21']) == 0)):
+                    self.capital += (self.bets[hand_idx] * (float(game.config['BLACKJACK_PAYOUT']) + 1))
+                    self.round_result = "blackjack"
+            elif (self.counted_hand_sums[hand_idx] > game.dealer.counted_hand_sum) or (game.dealer.bust):
+                self.capital += (self.bets[hand_idx] * 2)
+                self.round_result = "win"
+            elif self.counted_hand_sums[hand_idx] < game.dealer.counted_hand_sum:
+                self.round_result = "lose"
+
+            round_results.update({f"hand_{hand_idx}": dict(self.__dict__)})
+        
+        return round_results
+            
         
     def clear_hands(self):
         self.hands = [[]]
@@ -154,6 +156,7 @@ class Player:
         self.surrender = False
         self.insurance = False
         self.bust = [0]
+        self.round_result = None
         self.move_history = []
 
 
