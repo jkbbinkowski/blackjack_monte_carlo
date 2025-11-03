@@ -2,6 +2,7 @@ import configparser
 
 from .betting_strategies import *
 from .playing_strategies import *
+from .insurance_strategies import *
 
 
 config = configparser.ConfigParser()
@@ -20,6 +21,13 @@ def config_playing_strategy(player, game):
         mimic_the_dealer(player, game)
     else:
         raise ValueError("Invalid playing strategy")
+
+
+def config_insurance_strategy(player, game):
+    if player.insurance_strategy == "no_insurance":
+        no_insurance(player, game)
+    else:
+        raise ValueError("Invalid insurance strategy")
 
 
 def config_dealer_strategy(dealer, game):

@@ -22,19 +22,20 @@ class Deck:
 
 class Game:
     def __init__(self):
+        self.config = config['GAME']
         self.shuffle_stack()
         self.dealer = Dealer()
         self.players = []
-        self.min_bet = int(config['GAME']['MIN_BET'])
+        self.min_bet = int(self.config['MIN_BET'])
         self.dealer_face_card = None
         
     def shuffle_stack(self):
         # Shuffle stack
-        self.stack = Deck().cards * int(config['GAME']['DECKS_AMOUNT'])
+        self.stack = Deck().cards * int(self.config['DECKS_AMOUNT'])
         random.shuffle(self.stack)
         
         # Burn cards
-        for i in range(int(config['GAME']['BURN_CARDS_AMOUNT'])):
+        for i in range(int(self.config['BURN_CARDS_AMOUNT'])):
             self.stack.pop()
 
     def add_player(self, player):
@@ -42,7 +43,7 @@ class Game:
 
     def deal_initial_cards(self):
         # Shuffle stack if needed
-        if (len(self.stack) <= int(config['GAME']['SHUFFLE_DECK_ON'])) or (int(config['GAME']['SHUFFLE_ON_ROUND_START'])):
+        if (len(self.stack) <= int(self.config['SHUFFLE_DECK_ON'])) or (int(self.config['SHUFFLE_ON_ROUND_START'])):
             self.shuffle_stack()
 
         for i in range(2):
@@ -63,13 +64,16 @@ class Player:
         self.idx = idx
         self.playing_strategy = [x.strip() for x in config['PLAYERS']['PLAYING_STRATEGIES'].split(',')][idx]
         self.betting_strategy = [x.strip() for x in config['PLAYERS']['BETTING_STRATEGIES'].split(',')][idx]
+        self.insurance_strategy = [x.strip() for x in config['PLAYERS']['INSURANCE_STRATEGIES'].split(',')][idx]
         self.capital = int([x.strip() for x in config['PLAYERS']['CAPITALS'].split(',')][idx])
         self.hands = [[]]
         self.bets = []
+        self.double_down_bets = []
         self.hand_sums = [0]
         self.counted_hand_sums = [0]
         self.aces_amounts = [0]
         self.surrender = False
+        self.insurance = False
         self.move_history = []
 
     def place_new_bet(self, game):
@@ -91,13 +95,20 @@ class Player:
     def play_hand(self, game):
         strategies.config_playing_strategy(self, game)
 
+    def evaluate_insurance(self, game):
+        if int(game.config['INSURANCE_ALLOWED']) == 1:
+            if game.dealer_face_card == 11:
+                strategies.config_insurance_strategy(self, game)
+
     def clear_hands(self):
         self.hands = [[]]
         self.bets = []
+        self.double_down_bets = []
         self.hand_sums = [0]
         self.counted_hand_sums = [0]
         self.aces_amounts = [0]
         self.surrender = False
+        self.insurance = False
         self.move_history = []
 
 

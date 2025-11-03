@@ -7,8 +7,7 @@ Opis dla config [GAME]
     - PLAY_SPLIT_ACES - czy można grać po rozdzieleniu asów (jeżeli False, gracz otrzymuje jedną kartę (czyli ma 2 na parę) i gra się kończy (standard = 0))
     - BLACKJACK_AFTER_SPLIT_COUNTS_AS_21 - po rozdzieleniu jeżeli dostaje się A-10, NIE liczy się to jako blackjack (standard = 1)
     - ALLOW_SPLIT_TENS - czy można rozdzielać pary o wartośći 10 (np. 10-10, K-K) (standard = 1)
-    - INSURANCE_ALLOWE - czy ubezpieczenie jest dozwolone
-    - INSURANCE_EVEN_MONEY - gdy gracz ma blackjack (A-10) a krupiera odkrytą kartą jest as (A) to można wziąć pewną wygraną 1:1 (jak krupier nie ma blackjack to wyplata bylaby 3:2, gdyby miał to jest push) (standard = 0)
+    - INSURANCE_ALLOWED - czy ubezpieczenie jest dozwolone
 
 Opcje dla config [GAME][SURRENDER_TYPE]
     - none - poddanie niemożliwe
@@ -18,7 +17,7 @@ Opcje dla config [GAME][SURRENDER_TYPE]
 Opcje dla config [DEALER][HOLE_CARD]
     - american_peek - dealer otrzymuje na start hole_card (zakrytą) i sprawdza czy nie ma blackjacka przed ruchami graczy
     - american_peek_ace_only - jak wyżej tylko peek jest gdy odkrytą kartą jest as
-    - european_no_hole_card - dealer otrzymuje na start tylko jedną odkrytą kartę, drugą otrzymuje po ruchach wszystkich graczy (gracz traci tylko zakład pierwotny w przypadku blackjacka)
+    - european_no_hole_card - dealer otrzymuje na start tylko jedną odkrytą kartę, drugą otrzymuje po ruchach wszystkich graczy (gracz traci tylko zakład pierwotny w przypadku blackjacka) (!!! wartość surrender musi być ustawiona na none, bo wymaga hole card do działania !!!)
 
 Opcje dla config[PLAYERS][BETTING_STRATEGIES]
     - minimal_bet - za każdym razem stały bet równy minimalnemu MIN_BET
