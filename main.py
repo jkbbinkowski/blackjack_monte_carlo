@@ -1,7 +1,7 @@
 import configparser
 import classes
 import tqdm
-
+import json
 
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -37,7 +37,7 @@ for i in tqdm.tqdm(range(int(config['SIMULATION']['AMOUNT']))):
         # If dealer has blackjack, evaluate insurance and hand results
         for player in players:
             player.evaluate_insurance_result(game)
-            print(player.evaluate_hand_result(game))
+            player.evaluate_hand_result(game)
     else:
         # Play hands and dealer hand if dealer does not have blackjack
         for player in players:
@@ -49,9 +49,21 @@ for i in tqdm.tqdm(range(int(config['SIMULATION']['AMOUNT']))):
         # Evaluate insurance and hand results if dealer does not have blackjack
         for player in players:
             player.evaluate_insurance_result(game)
-            print(player.evaluate_hand_result(game))
-        
-    print('\n')
+            player.evaluate_hand_result(game)
 
     # Clear hands
     game.clear_hands()
+
+
+#Evaluate results
+profits = []
+bets = []
+for player in players:
+    for result in player.results_history:
+        for hand_result in result:
+            profits.append(hand_result["hand_0"]["capital"] - hand_result["hand_0"]["pre_game_capital"])
+            bets.append(hand_result["hand_0"]["bets"][0])
+
+print(f"Total profit: {sum(profits)}")
+print(f"Total bets: {sum(bets)}")
+print(f"Total profit percentage: {sum(profits) / sum(bets)}")

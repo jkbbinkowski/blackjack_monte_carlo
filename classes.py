@@ -78,6 +78,7 @@ class Player:
         self.insurance = False
         self.round_result = None
         self.move_history = []
+        self.results_history = []
 
     def place_new_bet(self, game):
         self.pre_game_capital = self.capital
@@ -112,39 +113,38 @@ class Player:
                 self.capital += (self.bets[0]/2) * (int(game.config['INSURANCE_PAYOUT']) + 1)
 
     def evaluate_hand_result(self, game):
-        # Check if player surrendered
         round_results = []
+        # Check if player surrendered
         if self.surrender:
             self.capital += (self.bets[0]/2)
             self.round_result = "surrender"
-            round_results.append({"hand_0": dict(self.__dict__), "dealer": dict(game.dealer.__dict__)})
-            
-        round_results = []
+            round_results.append({"hand_0": self.get_results(game)})
         # Evaluate hands
-        for hand_idx in range(len(self.hands)):
-            # Check if player busted
-            if self.bust[hand_idx]:
-                self.round_result = "bust"
-            # Check if player hand is equal to dealer hand sum
-            elif (self.counted_hand_sums[hand_idx] <= 21 and self.counted_hand_sums[hand_idx] == game.dealer.counted_hand_sum):
-                self.capital += (self.bets[hand_idx])
-                self.round_result = "push"
-            # Check if player has natural blackjack 
-            elif (self.counted_hand_sums[hand_idx] == 21) and (len(self.hands[hand_idx]) == 2):
-                # Check if natural blackjack is after split (config dependent)
-                if ((hand_idx == 0) or (int(game.config['BLACKJACK_AFTER_SPLIT_COUNTS_AS_21']) == 0)):
-                    self.capital += (self.bets[hand_idx] * (float(game.config['BLACKJACK_PAYOUT']) + 1))
-                    self.round_result = "blackjack"
-            elif (self.counted_hand_sums[hand_idx] > game.dealer.counted_hand_sum) or (game.dealer.bust):
-                self.capital += (self.bets[hand_idx] * 2)
-                self.round_result = "win"
-            elif self.counted_hand_sums[hand_idx] < game.dealer.counted_hand_sum:
-                self.round_result = "lose"
+        else:
+            for hand_idx in range(len(self.hands)):
+                # Check if player busted
+                if self.bust[hand_idx]:
+                    self.round_result = "bust"
+                # Check if player hand is equal to dealer hand sum
+                elif (self.counted_hand_sums[hand_idx] <= 21 and self.counted_hand_sums[hand_idx] == game.dealer.counted_hand_sum):
+                    self.capital += (self.bets[hand_idx])
+                    self.round_result = "push"
+                # Check if player has natural blackjack 
+                elif (self.counted_hand_sums[hand_idx] == 21) and (len(self.hands[hand_idx]) == 2):
+                    # Check if natural blackjack is after split (config dependent)
+                    if ((hand_idx == 0) or (int(game.config['BLACKJACK_AFTER_SPLIT_COUNTS_AS_21']) == 0)):
+                        self.capital += (self.bets[hand_idx] * (float(game.config['BLACKJACK_PAYOUT']) + 1))
+                        self.round_result = "blackjack"
+                elif (self.counted_hand_sums[hand_idx] > game.dealer.counted_hand_sum) or (game.dealer.bust):
+                    self.capital += (self.bets[hand_idx] * 2)
+                    self.round_result = "win"
+                elif self.counted_hand_sums[hand_idx] < game.dealer.counted_hand_sum:
+                    self.round_result = "lose"
 
-            round_results.append({f"hand_{hand_idx}": dict(self.__dict__), "dealer": dict(game.dealer.__dict__)})
+                round_results.append({f"hand_{hand_idx}": self.get_results(game)})
         
+        self.results_history.append(round_results)
         return round_results
-            
         
     def clear_hands(self):
         self.hands = [[]]
@@ -159,6 +159,34 @@ class Player:
         self.bust = [0]
         self.round_result = None
         self.move_history = []
+
+    def get_results(self, game):
+        return {
+            "idx": self.idx,
+            "playing_strategy": self.playing_strategy,
+            "betting_strategy": self.betting_strategy,
+            "insurance_strategy": self.insurance_strategy,
+            "pre_game_capital": self.pre_game_capital,
+            "capital": self.capital,
+            "hands": self.hands,
+            "bets": self.bets,
+            "double_down_bets": self.double_down_bets,
+            "hand_sums": self.hand_sums,
+            "counted_hand_sums": self.counted_hand_sums,
+            "aces_amounts": self.aces_amounts,
+            "bust": self.bust,
+            "surrender": self.surrender,
+            "insurance": self.insurance,
+            "round_result": self.round_result,
+            "move_history": self.move_history,
+            "dealer_hand": game.dealer.hand,
+            "dealer_hand_sum": game.dealer.hand_sum,
+            "dealer_counted_hand_sum": game.dealer.counted_hand_sum,
+            "dealer_aces_amount": game.dealer.aces_amount,
+            "dealer_bust": game.dealer.bust,
+            "dealer_peek_has_blackjack": game.dealer.peek_has_blackjack,
+        }
+
 
 
 class Dealer:
