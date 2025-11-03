@@ -1,5 +1,12 @@
-def basic_strategy(player, game):
-    pass
+def mimic_the_dealer(player, game):
+    if int(game.dealer.config["HIT_ON_SOFT_17"]) == 0:
+        while player.counted_hand_sums[0] < 17:
+            player.add_card(game.stack.pop(), 0)
+
+    elif int(game.dealer.config["HIT_ON_SOFT_17"]) == 1:
+        while (player.counted_hand_sums[0] < 17) or (player.counted_hand_sums[0] == 17 and player.has_soft_hand(0)):
+            player.add_card(game.stack.pop(), 0)
+
 
 
 def dealer_strategy(dealer, game):

@@ -78,6 +78,11 @@ class Player:
     def add_card(self, card, hand_idx):
         self.hands[hand_idx].append(card)
         self.hand_sums[hand_idx] = sum(self.hands[hand_idx])
+        self.counted_hand_sums[hand_idx] = self.hand_sums[hand_idx]
+        self.aces_amounts[hand_idx] = self.hands[hand_idx].count(11)
+        for i in range(self.aces_amounts[hand_idx]):
+            if self.counted_hand_sums[hand_idx] > 21:
+                self.counted_hand_sums[hand_idx] -= 10
 
     def has_soft_hand(self, hand_idx):
         has_soft_hand = (self.aces_amounts[hand_idx] > 0) and ((self.hand_sums[hand_idx] - self.counted_hand_sums[hand_idx]) < (self.aces_amounts[hand_idx]*10))
