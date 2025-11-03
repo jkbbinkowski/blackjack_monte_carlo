@@ -73,6 +73,7 @@ class Player:
         self.hand_sums = [0]
         self.counted_hand_sums = [0]
         self.aces_amounts = [0]
+        self.bust = [0]
         self.surrender = False
         self.insurance = False
         self.move_history = []
@@ -89,6 +90,8 @@ class Player:
         for i in range(self.aces_amounts[hand_idx]):
             if self.counted_hand_sums[hand_idx] > 21:
                 self.counted_hand_sums[hand_idx] -= 10
+        if self.counted_hand_sums[hand_idx] > 21:
+            self.bust[hand_idx] = True
 
     def has_soft_hand(self, hand_idx):
         has_soft_hand = (self.aces_amounts[hand_idx] > 0) and ((self.hand_sums[hand_idx] - self.counted_hand_sums[hand_idx]) < (self.aces_amounts[hand_idx]*10))
@@ -108,16 +111,37 @@ class Player:
                 self.capital += (self.bets[0]/2) * (int(game.config['INSURANCE_PAYOUT']) + 1)
 
     def evaluate_hand_result(self, game):
+        # Check if player surrendered
         if self.surrender:
             self.capital += (self.bets[0]/2)
+            return
         else:
             for hand_idx in range(len(self.hands)):
+                if self.bust[hand_idx]:
+                    continue
+                # Check if player hand is equal to dealer hand sum
+                elif (self.counted_hand_sums[hand_idx] <= 21 and self.counted_hand_sums[hand_idx] == game.dealer.counted_hand_sum):
+                    self.capital += (self.bets[hand_idx])
                 # Check if player has natural blackjack 
-                if (self.hand_sums[hand_idx] == 21) and (len(self.hands[hand_idx]) == 2):
+                elif (self.counted_hand_sums[hand_idx] == 21) and (len(self.hands[hand_idx]) == 2):
                     # Check if natural blackjack is after split (config dependent)
                     if ((hand_idx == 0) or (int(game.config['BLACKJACK_AFTER_SPLIT_COUNTS_AS_21']) == 0)):
-                        self.capital += (self.bets[0] * (float(game.config['BLACKJACK_PAYOUT']) + 1))
-                    
+                        self.capital += (self.bets[hand_idx] * (float(game.config['BLACKJACK_PAYOUT']) + 1))
+                elif (self.counted_hand_sums[hand_idx] > game.dealer.counted_hand_sum) or (game.dealer.bust):
+                    self.capital += (self.bets[hand_idx] * 2)
+                    print(f"Player {self.idx} wins on hand {hand_idx}")
+                    print(f"Capital before: {self.pre_game_capital}")
+                    print(f"Capital after: {self.capital}")
+                    print(f"Dealer hand: {game.dealer.hand}, counted hand sum: {game.dealer.counted_hand_sum}")
+                    print(f"Player hand: {self.hands[hand_idx]}, counted hand sum: {self.counted_hand_sums[hand_idx]}")
+                    print('\n')
+                elif self.counted_hand_sums[hand_idx] < game.dealer.counted_hand_sum:
+                    print(f"Player {self.idx} loses on hand {hand_idx}")
+                    print(f"Capital before: {self.pre_game_capital}")
+                    print(f"Capital after: {self.capital}")
+                    print(f"Dealer hand: {game.dealer.hand}, counted hand sum: {game.dealer.counted_hand_sum}")
+                    print(f"Player hand: {self.hands[hand_idx]}, counted hand sum: {self.counted_hand_sums[hand_idx]}")
+                    print('\n')
         
     def clear_hands(self):
         self.hands = [[]]
@@ -129,6 +153,7 @@ class Player:
         self.aces_amounts = [0]
         self.surrender = False
         self.insurance = False
+        self.bust = [0]
         self.move_history = []
 
 
@@ -140,6 +165,7 @@ class Dealer:
         self.counted_hand_sum = 0
         self.aces_amount = 0
         self.peek_has_blackjack = False
+        self.bust = False
 
     def add_card(self, card):
         self.hand.append(card)
@@ -149,6 +175,8 @@ class Dealer:
         for i in range(self.aces_amount):
             if self.counted_hand_sum > 21:
                 self.counted_hand_sum -= 10
+        if self.counted_hand_sum > 21:
+            self.bust = True
 
     def has_soft_hand(self):
         has_soft_hand = (self.aces_amount > 0) and ((self.hand_sum - self.counted_hand_sum) < (self.aces_amount*10))
@@ -166,16 +194,26 @@ class Dealer:
         return False
 
     def play_hand(self, game):
-        if "european" in self.config["HOLE_CARD"]:
-            self.add_card(game.stack.pop())
-            # Check if dealer has blackjack right after receiving the second card (only in european version to ensure insurance evaluation is correct)
-            if self.counted_hand_sum == 21:
-                self.peek_has_blackjack = True
-        strategies.config_dealer_strategy(self, game)
-        
+        # Check if ALL of the players busted or surrendered (then dealer doesn't make any moves later)
+        all_players_busted_or_surrendered = True
+        for player in game.players:
+            for hand_idx in range(len(player.hands)):
+                if (not player.bust[hand_idx]) and (not player.surrender):
+                    all_players_busted_or_surrendered = False
+                    break
+
+        if not all_players_busted_or_surrendered:
+            if "european" in self.config["HOLE_CARD"]:
+                self.add_card(game.stack.pop())
+                # Check if dealer has blackjack right after receiving the second card (only in european version to ensure insurance evaluation is correct)
+                if self.counted_hand_sum == 21:
+                    self.peek_has_blackjack = True
+            strategies.config_dealer_strategy(self, game)
+            
     def clear_hands(self):
         self.hand = []
         self.hand_sum = 0
         self.counted_hand_sum = 0
         self.aces_amount = 0
         self.peek_has_blackjack = False
+        self.bust = False
