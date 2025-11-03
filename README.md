@@ -16,6 +16,6 @@ Opcje dla config [GAME][SURRENDER_TYPE]
     - late - można się poddać, o ile dealer nie ma blackjacka (standard)
 
 Opcje dla config [DEALER][HOLE_CARD]
-    - peek - gdy dealer ma A/10, sprawdza czy ma BJ. Jeżeli ma, gra sie kończy. (standard)
-    - no_peek_obo - dealer nie sprawdza czy ma BJ, gra toczy sie dalej. Jeżeli się okaże że ma, to traci się tylko zakład pierwotny (ew. split, double down nie jest tracony)
-    - no_peek_all - jak wyżej, tylko tracisz wszystko
+    - american_peek - dealer otrzymuje na start hole_card (zakrytą) i sprawdza czy nie ma blackjacka przed ruchami graczy
+    - american_peek_ace_only - jak wyżej tylko peek jest gdy odkrytą kartą jest as
+    - european_no_hole_card - dealer otrzymuje na start tylko jedną odkrytą kartę, drugą otrzymuje po ruchach wszystkich graczy
