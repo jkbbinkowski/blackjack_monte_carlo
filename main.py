@@ -30,7 +30,7 @@ for i in tqdm.tqdm(range(int(config['SIMULATION']['AMOUNT']))):
 
     # Evaluate insurance
     for player in players:
-        player.evaluate_insurance(game)
+        player.play_insurance(game)
 
     # Check if dealer has blackjack (peek according to config)
     game.dealer.peek()

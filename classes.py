@@ -95,7 +95,7 @@ class Player:
     def play_hand(self, game):
         strategies.config_playing_strategy(self, game)
 
-    def evaluate_insurance(self, game):
+    def play_insurance(self, game):
         if int(game.config['INSURANCE_ALLOWED']) == 1:
             if game.dealer_face_card == 11:
                 strategies.config_insurance_strategy(self, game)
