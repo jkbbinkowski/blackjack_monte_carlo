@@ -22,14 +22,17 @@ for player in players:
 # Run simulation
 for i in tqdm.tqdm(range(int(config['SIMULATION']['AMOUNT']))):
     # Place bets before play
-    for player in players:
-        player.place_new_bet(game)
+    # for player in players:
+    #     player.place_new_bet(game)
 
     # Deal initial cards
     game.deal_initial_cards()
 
     # Check if dealer has blackjack
     game.dealer.check_blackjack()
-    
+
+    for player in players:
+        player.play_hand(game)
+
     # Clear hands
     game.clear_hands()

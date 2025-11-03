@@ -63,11 +63,14 @@ class Player:
         self.move_history = []
 
     def place_new_bet(self, game):
-        strategies.default_betting_strategy(self, game)
+        strategies.config_betting_strategy(self, game)
 
     def add_card(self, card, hand_idx=0):
         self.hands[hand_idx].append(card)
         self.hand_sums[hand_idx] = sum(self.hands[hand_idx])
+
+    def play_hand(self, game):
+        strategies.config_playing_strategy(self, game)
 
     def clear_hands(self):
         self.hands = [[]]
