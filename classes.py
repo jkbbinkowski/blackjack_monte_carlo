@@ -29,15 +29,22 @@ class Game:
         self.dealer_face_card = None
         
     def shuffle_stack(self):
+        # Shuffle stack
         self.stack = Deck().cards * int(config['GAME']['DECKS_AMOUNT'])
         random.shuffle(self.stack)
+        
+        # Burn cards
+        for i in range(int(config['GAME']['BURN_CARDS_AMOUNT'])):
+            self.stack.pop()
 
     def add_player(self, player):
         self.players.append(player)
 
     def deal_initial_cards(self):
-        if len(self.stack) <= int(config['GAME']['SHUFFLE_DECK_ON']):
+        # Shuffle stack if needed
+        if (len(self.stack) <= int(config['GAME']['SHUFFLE_DECK_ON'])) or (int(config['GAME']['SHUFFLE_ON_ROUND_START'])):
             self.shuffle_stack()
+
         for i in range(2):
             for player in self.players:
                 player.add_card(self.stack.pop(), 0)
