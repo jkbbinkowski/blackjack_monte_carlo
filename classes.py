@@ -100,6 +100,11 @@ class Player:
             if game.dealer_face_card == 11:
                 strategies.config_insurance_strategy(self, game)
 
+    def evaluate_insurance_result(self, game):
+        if self.insurance:
+            if game.dealer.peek_has_blackjack:
+                self.capital += (self.bets[0]/2) * int(game.config['INSURANCE_PAYOUT'])
+        
     def clear_hands(self):
         self.hands = [[]]
         self.bets = []
@@ -145,6 +150,9 @@ class Dealer:
     def play_hand(self, game):
         if "european" in self.config["HOLE_CARD"]:
             self.add_card(game.stack.pop())
+            # Check if dealer has blackjack right after receiving the second card (only in european version to ensure insurance evaluation is correct)
+            if self.counted_hand_sum == 21:
+                self.peek_has_blackjack = True
         strategies.config_dealer_strategy(self, game)
         
     def clear_hands(self):
