@@ -26,8 +26,8 @@ def config_playing_strategy(player, game):
 def config_insurance_strategy(player, game):
     if player.insurance_strategy == "no_insurance": # never play insurance
         no_insurance(player, game)
-    elif player.insurance_strategy == "play_insurance": # always play insurance when possible
-        play_insurance(player, game)
+    elif player.insurance_strategy == "always_play_insurance": # always play insurance when possible
+        always_play_insurance(player, game)
     else:
         raise ValueError("Invalid insurance strategy")
 
