@@ -64,6 +64,8 @@ class Player:
         self.bets = []
         self.capital = int([x.strip() for x in config['PLAYERS']['CAPITALS'].split(',')][idx])
         self.hand_sums = [0]
+        self.counted_hand_sums = [0]
+        self.aces_amounts = [0]
         self.playing_strategy = [x.strip() for x in config['PLAYERS']['PLAYING_STRATEGIES'].split(',')][idx]
         self.betting_strategy = [x.strip() for x in config['PLAYERS']['BETTING_STRATEGIES'].split(',')][idx]
         self.surrender = False
@@ -72,9 +74,13 @@ class Player:
     def place_new_bet(self, game):
         strategies.config_betting_strategy(self, game)
 
-    def add_card(self, card, hand_idx=0):
+    def add_card(self, card, hand_idx):
         self.hands[hand_idx].append(card)
         self.hand_sums[hand_idx] = sum(self.hands[hand_idx])
+
+    def has_soft_hand(self, hand_idx):
+        has_soft_hand = (self.aces_amounts[hand_idx] > 0) and ((self.hand_sums[hand_idx] - self.counted_hand_sums[hand_idx]) < (self.aces_amounts[hand_idx]*10))
+        return has_soft_hand
 
     def play_hand(self, game):
         strategies.config_playing_strategy(self, game)
@@ -83,6 +89,8 @@ class Player:
         self.hands = [[]]
         self.bets = []
         self.hand_sums = [0]
+        self.counted_hand_sums = [0]
+        self.aces_amounts = [0]
         self.surrender = False
         self.move_history = []
 
