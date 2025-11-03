@@ -23,4 +23,4 @@ def config_playing_strategy(player, game):
 
 
 def config_dealer_strategy(dealer, game):
-    dealer_strategy(dealer, game, config['DEALER'])
+    dealer_strategy(dealer, game)

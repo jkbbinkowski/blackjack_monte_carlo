@@ -92,18 +92,22 @@ class Dealer:
         self.config = config['DEALER']
         self.hand = []
         self.hand_sum = 0
+        self.counted_hand_sum = 0
+        self.aces_amount = 0
         self.has_blackjack = False
 
     def add_card(self, card):
         self.hand.append(card)
         self.hand_sum = sum(self.hand)
-        if self.hand_sum > 21:
-            aces_amount = self.hand.count(11)
-            for i in range(aces_amount):
-                if self.hand_sum <= 21:
-                    break
-                else:
-                    self.hand_sum -= 10
+        self.counted_hand_sum = self.hand_sum
+        self.aces_amount = self.hand.count(11)
+        for i in range(self.aces_amount):
+            if self.counted_hand_sum > 21:
+                self.counted_hand_sum -= 10
+
+    def has_soft_hand(self):
+        has_soft_hand = (self.aces_amount > 0) and ((self.hand_sum - self.counted_hand_sum) < (self.aces_amount*10))
+        return has_soft_hand
 
     def check_blackjack(self):
         if (10 in self.hand) and (11 in self.hand):
@@ -115,4 +119,5 @@ class Dealer:
     def clear_hands(self):
         self.hand = []
         self.hand_sum = 0
+        self.aces_amount = 0
         self.has_blackjack = False
