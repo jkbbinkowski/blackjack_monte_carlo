@@ -33,9 +33,7 @@ for i in tqdm.tqdm(range(int(config['SIMULATION']['AMOUNT']))):
         player.play_insurance(game)
 
     # Check if dealer has blackjack (peek according to config)
-    game.dealer.peek()
-
-    if game.dealer.peek_has_blackjack:
+    if game.dealer.peek():
         # If dealer has blackjack, evaluate insurance and hand results
         for player in players:
             player.evaluate_insurance_result(game)
@@ -48,9 +46,9 @@ for i in tqdm.tqdm(range(int(config['SIMULATION']['AMOUNT']))):
         # Play dealer hand
         game.dealer.play_hand(game)
 
-        # for player in players:
-        #     player.evaluate_insurance_result(game)
-        #     player.evaluate_hand_result(game)
+        for player in players:
+            player.evaluate_insurance_result(game)
+            #player.evaluate_hand_result(game)
 
     # Clear hands
     game.clear_hands()

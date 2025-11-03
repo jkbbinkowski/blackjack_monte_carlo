@@ -66,6 +66,7 @@ class Player:
         self.betting_strategy = [x.strip() for x in config['PLAYERS']['BETTING_STRATEGIES'].split(',')][idx]
         self.insurance_strategy = [x.strip() for x in config['PLAYERS']['INSURANCE_STRATEGIES'].split(',')][idx]
         self.capital = int([x.strip() for x in config['PLAYERS']['CAPITALS'].split(',')][idx])
+        self.pre_game_capital = 0
         self.hands = [[]]
         self.bets = []
         self.double_down_bets = []
@@ -77,6 +78,7 @@ class Player:
         self.move_history = []
 
     def place_new_bet(self, game):
+        self.pre_game_capital = self.capital
         strategies.config_betting_strategy(self, game)
 
     def add_card(self, card, hand_idx):
@@ -108,6 +110,7 @@ class Player:
     def clear_hands(self):
         self.hands = [[]]
         self.bets = []
+        self.pre_game_capital = 0
         self.double_down_bets = []
         self.hand_sums = [0]
         self.counted_hand_sums = [0]
@@ -143,9 +146,12 @@ class Dealer:
         if self.config["HOLE_CARD"] == "american_peek":
             if ((10 in self.hand) and (11 in self.hand)):
                 self.peek_has_blackjack = True
+                return True
         elif self.config["HOLE_CARD"] == "american_peek_ace_only":
             if (self.hand[0] == 11) and (self.hand[1] == 10):
                 self.peek_has_blackjack = True
+                return True
+        return False
 
     def play_hand(self, game):
         if "european" in self.config["HOLE_CARD"]:
