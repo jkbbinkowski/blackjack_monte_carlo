@@ -102,7 +102,7 @@ class Dealer:
         self.hand_sum = 0
         self.counted_hand_sum = 0
         self.aces_amount = 0
-        self.has_blackjack = False
+        self.peek_has_blackjack = False
 
     def add_card(self, card):
         self.hand.append(card)
@@ -117,9 +117,13 @@ class Dealer:
         has_soft_hand = (self.aces_amount > 0) and ((self.hand_sum - self.counted_hand_sum) < (self.aces_amount*10))
         return has_soft_hand
 
-    def check_blackjack(self):
-        if (10 in self.hand) and (11 in self.hand):
-            self.has_blackjack = True
+    def peek(self):
+        if self.config["HOLE_CARD"] == "american_peek":
+            if (10 in self.hand) and (11 in self.hand):
+                self.peek_has_blackjack = True
+        elif self.config["HOLE_CARD"] == "american_peek_ace_only":
+            if (self.hand[0] == 11) and (self.hand[1] == 10):
+                self.peek_has_blackjack = True
 
     def play_hand(self, game):
         strategies.config_dealer_strategy(self, game)
