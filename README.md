@@ -56,7 +56,7 @@ The simulator so far consists of one, non-sensitive configuration file. Below th
 | early | early surrendering is possible | |
 | late | late surrendering is possible | can't be set if [DEALER][HOLE_CARD] = european_no_hole_card |
 
-## [PLAYERS]
+## PLAYERS
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | AMOUNT | INT | amount of players for the game |
@@ -65,18 +65,18 @@ The simulator so far consists of one, non-sensitive configuration file. Below th
 | BETTING_STRATEGIES | LIST | betting strategy for each player, options available below |
 | INSURANCE_STRATEGIES | LIST | insurance strategy for each player, options available below |
 
-## [PLAYERS][PLAYING_STRATEGIES]
+## PLAYERS-PLAYING_STRATEGIES
 | Value | Description | Important |
 | ----- | ----------- | --------- |
 | basic_strategy | player plays only using basic strategy tables | tables are located in strategies module, verify the moves because they might differ for different game rules |
 | mimic_the_dealer | player plays the same way as dealer | | 
 
-### [PLAYERS][BETTING_STRATEGIES]
+### PLAYERS-BETTING_STRATEGIES
 | Value | Description | Important |
 | ----- | ----------- | --------- |
 | minimal_bet | every time player sets a bet equal to [GAME][MIN_BET] | | 
 
-## [PLAYERS][INSURANCE_STRATEGIES]
+## -PLAYERS-INSURANCE_STRATEGIES
 | Value | Description | Important |
 | ----- | ----------- | --------- |
 | no_insurance | player does not use insurance at all | |
