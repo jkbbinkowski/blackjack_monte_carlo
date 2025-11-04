@@ -26,7 +26,7 @@ The output of simulations is being exported to csv file after each simulation, a
 
 
 ## CONFIGURATION
-The simulator so far consists of one, non-sensitive configuration file. Below there is description of most of the configration variables (some of them are only in config.ini and are self explanatory)<br>
+The simulator so far consists of one, non-sensitive configuration file. Below there is description of most of the configration variables (some of them are not listed below, they are only in config.ini and are self-explanatory)<br>
 <b>All bool values are supposed to be either 0 or 1</b><br>
 
 ### GAME
