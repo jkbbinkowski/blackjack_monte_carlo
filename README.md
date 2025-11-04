@@ -54,7 +54,7 @@ The simulator so far consists of one, non-sensitive configuration file. Below th
 | ----- | ----------- | --------- |
 | none | surrendering is impossible | |
 | early | early surrendering is possible | |
-| late | late surrendering is possible | can't be set if [DEALER][HOLE_CARD] = european_no_hole_card |
+| late | late surrendering is possible | can't be set if DEALER-HOLE_CARD- = european_no_hole_card |
 
 ## PLAYERS
 | Name | Type | Description |
@@ -74,7 +74,7 @@ The simulator so far consists of one, non-sensitive configuration file. Below th
 ### PLAYERS-BETTING_STRATEGIES
 | Value | Description | Important |
 | ----- | ----------- | --------- |
-| minimal_bet | every time player sets a bet equal to [GAME][MIN_BET] | | 
+| minimal_bet | every time player places a bet equal to GAME-MIN_BET | | 
 
 ## -PLAYERS-INSURANCE_STRATEGIES
 | Value | Description | Important |
@@ -87,4 +87,4 @@ The simulator so far consists of one, non-sensitive configuration file. Below th
 | ----- | ----------- | --------- |
 | american_peek | dealer receives 2 cards during initial play (1x hole card) and checks if doesn't have blackjack before any player movements | |
 | american_peek_ace_only | same as american_peek, but checking for blackjack only applies to face card being an ace | |
-| european_no_hole_card | dealer receives 1 card during initial play (0x hole card), second card is being dealt after all players finish plays | can't be set if [GAME][SURRENDER_TYPE] = early |
+| european_no_hole_card | dealer receives 1 card during initial play (0x hole card), second card is being dealt after all players finish plays | can't be set if GAME-SURRENDER_TYPE = early |
