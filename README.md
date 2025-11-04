@@ -29,7 +29,7 @@ The simulator so far consists of one, non-sensitive configuration file. Below th
 <b>All bool values are supposed to be either 0 or 1</b><br>
 <B>All list values are supposed to be in format: 100, 100, 100, 100; no braces used, if thers is one value treat as INT/FLOAT</b>
 
-### GAME
+## GAME
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | SHUFFLE_DECK_ON | INT | shuffling penetration, amount of cards left in the shoe, at which shuffling will occur (ex. for 6 decks, 75% penetration, set value to 78) |
@@ -53,7 +53,7 @@ The simulator so far consists of one, non-sensitive configuration file. Below th
 | ----- | ----------- | --------- |
 | none | surrendering is impossible | |
 | early | early surrendering is possible | |
-| late | late surrendering is possible | can't be set if DEALER-HOLE_CARD- = european_no_hole_card |
+| late | late surrendering is possible | can't be set if DEALER-HOLE_CARD = european_no_hole_card |
 
 ## PLAYERS
 | Name | Type | Description |
@@ -64,7 +64,7 @@ The simulator so far consists of one, non-sensitive configuration file. Below th
 | BETTING_STRATEGIES | LIST | betting strategy for each player, options available below |
 | INSURANCE_STRATEGIES | LIST | insurance strategy for each player, options available below |
 
-## PLAYERS-PLAYING_STRATEGIES
+### PLAYERS-PLAYING_STRATEGIES
 | Value | Description | Important |
 | ----- | ----------- | --------- |
 | basic_strategy | player plays only using basic strategy tables | tables are located in strategies module, verify the moves because they might differ for different game rules |
@@ -75,13 +75,13 @@ The simulator so far consists of one, non-sensitive configuration file. Below th
 | ----- | ----------- | --------- |
 | minimal_bet | every time player places a bet equal to GAME-MIN_BET | | 
 
-## -PLAYERS-INSURANCE_STRATEGIES
+### -PLAYERS-INSURANCE_STRATEGIES
 | Value | Description | Important |
 | ----- | ----------- | --------- |
 | no_insurance | player does not use insurance at all | |
 | always_play_insurance | player uses insurance at every possible occasion | | 
 
-### DEALER-HOLE_CARD
+## DEALER-HOLE_CARD
 | Value | Description | Important |
 | ----- | ----------- | --------- |
 | american_peek | dealer receives 2 cards during initial play (1x hole card) and checks if doesn't have blackjack before any player movements | |
