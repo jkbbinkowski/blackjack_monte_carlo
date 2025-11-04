@@ -1,6 +1,8 @@
 import configparser
 import random
 import strategies
+import csv
+import time
 
 
 config = configparser.ConfigParser()
@@ -26,6 +28,7 @@ class Game:
         self.shuffle_stack()
         self.dealer = Dealer()
         self.players = []
+        self.results = Results()
         self.dealer_face_card = None
         
     def shuffle_stack(self):
@@ -77,7 +80,6 @@ class Player:
         self.insurance = False
         self.round_result = None
         self.move_history = []
-        self.results_history = []
 
     def place_new_bet(self, game):
         self.pre_game_capital = self.capital
@@ -142,7 +144,7 @@ class Player:
 
                 round_results.append({f"hand_{hand_idx}": self.get_results(game)})
         
-        self.results_history.append(round_results)
+        game.results.add_result(round_results)
         
         return round_results
         
@@ -186,7 +188,6 @@ class Player:
             "dealer_bust": game.dealer.bust,
             "dealer_peek_has_blackjack": game.dealer.peek_has_blackjack,
         }
-
 
 
 class Dealer:
@@ -249,3 +250,11 @@ class Dealer:
         self.aces_amount = 0
         self.peek_has_blackjack = False
         self.bust = False
+
+
+class Results:
+    def __init__(self):
+        self.results_history = []
+
+    def add_result(self, result):
+        self.results_history.append(result)

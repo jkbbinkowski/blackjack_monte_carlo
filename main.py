@@ -54,16 +54,4 @@ for i in tqdm.tqdm(range(int(config['SIMULATION']['AMOUNT']))):
     # Clear hands
     game.clear_hands()
 
-
-#Evaluate results
-profits = []
-bets = []
-for player in players:
-    for result in player.results_history:
-        for hand_result in result:
-            profits.append(hand_result["hand_0"]["capital"] - hand_result["hand_0"]["pre_game_capital"])
-            bets.append(hand_result["hand_0"]["bets"][0])
-
-print(f"Total profit: {sum(profits)}")
-print(f"Total bets: {sum(bets)}")
-print(f"Total EV: {sum(profits) / sum(bets)}")
+print(game.results.results_history)
