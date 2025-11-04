@@ -143,6 +143,7 @@ class Player:
                 round_results.append({f"hand_{hand_idx}": self.get_results(game)})
         
         self.results_history.append(round_results)
+        
         return round_results
         
     def clear_hands(self):
