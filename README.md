@@ -2,7 +2,7 @@
 
 ## OVERVIEW
 This is fully functional script, which is using monte carlo method for simulating output of blackjack game, with possibility of adjusting different game rules.<br>
-The output of simulations is being exported to csv file after each simulation, allowing for further statistical analysis.<br>
+The output of simulations is being exported to csv file (will be impleneted soon) after each simulation, allowing for further statistical analysis.<br>
 
 ## REQUIREMENTS
 - Python3
