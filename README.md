@@ -1,7 +1,6 @@
 # Blackjack monte carlo simulator
 
 ## OVERVIEW
-### Before working with the application, make sure to read LICENSE file.
 This is fully functional script, which is using monte carlo method for simulating output of blackjack game, with possibility of adjusting different game rules.<br>
 The output of simulations is being exported to csv file after each simulation, allowing for further statistical analysis.<br>
 
