@@ -26,7 +26,6 @@ class Game:
         self.shuffle_stack()
         self.dealer = Dealer()
         self.players = []
-        self.min_bet = int(self.config['MIN_BET'])
         self.dealer_face_card = None
         
     def shuffle_stack(self):

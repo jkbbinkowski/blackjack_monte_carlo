@@ -1,8 +1,8 @@
 def minimal_bet(player, game):
-    bet = game.min_bet
+    bet = int(game.config['MIN_BET'])
     if bet > player.capital:
         raise ValueError("Bet is greater than capital")
-    elif bet > game.max_bet:
+    elif bet > int(game.config['MAX_BET']):
         raise ValueError("Bet is greater than max bet")
     player.capital -= bet
     player.bets.append(bet)

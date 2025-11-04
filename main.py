@@ -66,4 +66,4 @@ for player in players:
 
 print(f"Total profit: {sum(profits)}")
 print(f"Total bets: {sum(bets)}")
-print(f"Total profit percentage: {sum(profits) / sum(bets)}")
+print(f"Total EV: {sum(profits) / sum(bets)}")
