@@ -3,7 +3,7 @@ import random
 import strategies
 import csv
 import time
-
+import os
 
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -71,15 +71,15 @@ class Player:
         self.capital = int([x.strip() for x in config['PLAYERS']['CAPITALS'].split(',')][idx])
         self.hands = [[]]
         self.bets = []
-        self.double_down_bets = []
+        self.double_down_bets = [False]
         self.hand_sums = [0]
         self.counted_hand_sums = [0]
         self.aces_amounts = [0]
-        self.bust = [0]
+        self.bust = [False]
         self.surrender = False
         self.insurance = False
         self.round_result = None
-        self.move_history = []
+        self.move_histories = []
 
     def place_new_bet(self, game):
         self.pre_game_capital = self.capital
@@ -119,7 +119,7 @@ class Player:
         if self.surrender:
             self.capital += (self.bets[0]/2)
             self.round_result = "surrender"
-            round_results.append({"hand_0": self.get_results(game)})
+            round_results.append(self.get_results(game, 0))
         # Evaluate hands
         else:
             for hand_idx in range(len(self.hands)):
@@ -142,8 +142,10 @@ class Player:
                 elif self.counted_hand_sums[hand_idx] < game.dealer.counted_hand_sum:
                     self.round_result = "lose"
 
-                round_results.append({f"hand_{hand_idx}": self.get_results(game)})
-        
+                if self.move_histories == []:
+                    self.move_histories.append([])
+                round_results.append(self.get_results(game, hand_idx))
+
         game.results.add_result(round_results)
         
         return round_results
@@ -152,36 +154,37 @@ class Player:
         self.hands = [[]]
         self.bets = []
         self.pre_game_capital = 0
-        self.double_down_bets = []
+        self.double_down_bets = [False]
         self.hand_sums = [0]
         self.counted_hand_sums = [0]
         self.aces_amounts = [0]
         self.surrender = False
         self.insurance = False
-        self.bust = [0]
+        self.bust = [False]
         self.round_result = None
-        self.move_history = []
+        self.move_histories = []
 
-    def get_results(self, game):
+    def get_results(self, game, hand_idx):
         return {
-            "idx": self.idx,
+            "player_idx": self.idx,
+            "hand_idx": hand_idx,
             "playing_strategy": self.playing_strategy,
             "betting_strategy": self.betting_strategy,
             "insurance_strategy": self.insurance_strategy,
             "pre_game_capital": self.pre_game_capital,
             "capital": self.capital,
-            "hands": self.hands,
-            "bets": self.bets,
-            "double_down_bets": self.double_down_bets,
-            "hand_sums": self.hand_sums,
-            "counted_hand_sums": self.counted_hand_sums,
-            "aces_amounts": self.aces_amounts,
-            "bust": self.bust,
+            "hand": str(self.hands[hand_idx]),
+            "bet": self.bets[hand_idx],
+            "double_down_bet": self.double_down_bets[hand_idx],
+            "hand_sum": self.hand_sums[hand_idx],
+            "counted_hand_sum": self.counted_hand_sums[hand_idx],
+            "aces_amount": self.aces_amounts[hand_idx],
+            "bust": self.bust[hand_idx],
             "surrender": self.surrender,
             "insurance": self.insurance,
             "round_result": self.round_result,
-            "move_history": self.move_history,
-            "dealer_hand": game.dealer.hand,
+            "move_history": str(self.move_histories[hand_idx]),
+            "dealer_hand": str(game.dealer.hand),
             "dealer_hand_sum": game.dealer.hand_sum,
             "dealer_counted_hand_sum": game.dealer.counted_hand_sum,
             "dealer_aces_amount": game.dealer.aces_amount,
@@ -255,6 +258,41 @@ class Dealer:
 class Results:
     def __init__(self):
         self.results_history = []
+        self.headers_added = False
+        self.config = config['SIMULATION']
+        self.folder_name = self.config['EXPORT_FOLDER']
+        self.time_str = str(time.strftime("%Y%m%d_%H%M%S"))
+        self.file_path = f"{self.folder_name}/{self.config['EXPORT_FILE_NAME']}_{self.time_str}.csv"
 
+        if int(self.config['EXPORT_CSV']) == 1: 
+            self.create_directory()
+            self.create_file()
+
+    def create_directory(self):
+        if not os.path.exists(self.folder_name):
+            os.makedirs(self.folder_name)
+    
+    def create_file(self):
+        if not os.path.exists(self.file_path):
+            with open(self.file_path, 'w') as f:
+                f.write('')
+        
     def add_result(self, result):
         self.results_history.append(result)
+        if int(self.config['EXPORT_BUFFERING']) == 1 and int(self.config['EXPORT_CSV']) == 1:
+            if len(self.results_history) >= int(self.config['EXPORT_BUFFER_SIZE']):
+                self.export_results()
+
+    def export_results(self):
+        if int(self.config['EXPORT_CSV']) == 1:
+            if self.headers_added == False:
+                with open(self.file_path, 'a', newline='') as f:
+                    dict_writer = csv.DictWriter(f, self.results_history[0][0].keys(), delimiter=self.config['EXPORT_CSV_DELIMITER'])
+                    dict_writer.writeheader()
+                    self.headers_added = True
+        
+            with open(self.file_path, 'a', newline='') as f:
+                for round_results in self.results_history:
+                    dict_writer = csv.DictWriter(f, round_results[0].keys(), delimiter=self.config['EXPORT_CSV_DELIMITER'])
+                    dict_writer.writerows(round_results)
+                self.results_history = []

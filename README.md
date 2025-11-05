@@ -87,3 +87,13 @@ The simulator so far consists of one, non-sensitive configuration file. Below th
 | american_peek | dealer receives 2 cards during initial play (1x hole card) and checks if doesn't have blackjack before any player movements | |
 | american_peek_ace_only | same as american_peek, but checking for blackjack only applies to face card being an ace | |
 | european_no_hole_card | dealer receives 1 card during initial play (0x hole card), second card is being dealt after all players finish plays | can't be set if GAME-SURRENDER_TYPE = early |
+
+## SIMULATION
+| VALUE | Description | Important |
+| ----- | ----------- | --------- |
+| EXPORT_CSV | if result should  be exported to csv | |
+| EXPORT_FOLDER | folder withing main directiory that will keep exported files | | 
+| EXPORT_BUFFERING | for large number of probes, buffering will ensure that results will be saving to file periodically, thus keeping the simulation running fast and cleaning ram after each save | |
+| EXPORT_BUFFER_SIZE | numer of probes after which results will be saved to file and history stored in ram will be cleaned | | 
+| EXPORT_FILE_NAME | name of the file which will keep the results (at the end will be added date and time in format _yyyymmdd_hhmmss) | |
+| EXPORT_CSV_DELIMITER | delimiter in csv file | some of the data is saved as native python list in string, thus delimiter should be set carefully to ensure data integrity

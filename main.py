@@ -20,7 +20,7 @@ for player in players:
     game.add_player(player)
 
 # Run simulation
-for i in tqdm.tqdm(range(int(config['SIMULATION']['AMOUNT']))):
+for i in tqdm.tqdm(range(int(config['SIMULATION']['PROBES']))):
     # Place bets before play
     for player in players:
         player.place_new_bet(game)
@@ -54,4 +54,5 @@ for i in tqdm.tqdm(range(int(config['SIMULATION']['AMOUNT']))):
     # Clear hands
     game.clear_hands()
 
-print(game.results.results_history)
+if int(config['SIMULATION']['EXPORT_CSV']) == 1:
+    game.results.export_results()
