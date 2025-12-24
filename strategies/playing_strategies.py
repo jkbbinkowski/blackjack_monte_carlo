@@ -1,3 +1,5 @@
+from .basic_strategy import *
+
 def mimic_the_dealer(player, game):
     local_move_history = []
     if int(game.dealer.config["HIT_ON_SOFT_17"]) == 0:
@@ -12,6 +14,15 @@ def mimic_the_dealer(player, game):
 
     player.move_histories.append(local_move_history)
 
+
+def basic_strategy(player, game):
+    local_move_history = []
+    # check if player hands are pairs
+    for hand_idx, player_hand in enumerate(player.hands):
+        if player_hand[0] == player_hand[1]:
+            player.split_hand(hand_idx, game)
+            local_move_history.append("SP")
+            
 
 def dealer_strategy(dealer, game):
     if int(dealer.config["HIT_ON_SOFT_17"]) == 0:

@@ -19,6 +19,8 @@ def config_betting_strategy(player, game):
 def config_playing_strategy(player, game):
     if player.playing_strategy == "mimic_the_dealer":
         mimic_the_dealer(player, game)
+    elif player.playing_strategy == "basic_strategy":
+        basic_strategy(player, game)
     else:
         raise ValueError("Invalid playing strategy")
 

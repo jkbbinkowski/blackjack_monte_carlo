@@ -67,7 +67,7 @@ class Player:
         self.playing_strategy = [x.strip() for x in config['PLAYERS']['PLAYING_STRATEGIES'].split(',')][idx]
         self.betting_strategy = [x.strip() for x in config['PLAYERS']['BETTING_STRATEGIES'].split(',')][idx]
         self.insurance_strategy = [x.strip() for x in config['PLAYERS']['INSURANCE_STRATEGIES'].split(',')][idx]
-        self.pre_game_capital = 0
+        self.pre_game_capitals = 0
         self.capital = int([x.strip() for x in config['PLAYERS']['CAPITALS'].split(',')][idx])
         self.hands = [[]]
         self.bets = []
@@ -81,9 +81,11 @@ class Player:
         self.round_result = None
         self.move_histories = []
 
+
     def place_new_bet(self, game):
         self.pre_game_capital = self.capital
         strategies.config_betting_strategy(self, game)
+
 
     def add_card(self, card, hand_idx):
         self.hands[hand_idx].append(card)
@@ -149,6 +151,22 @@ class Player:
         game.results.add_result(round_results)
         
         return round_results
+
+
+    def split_hand(self, hand_idx, game):
+        card = self.hands[hand_idx].pop()
+        self.hands.append([card])
+        self.place_new_bet(game)
+        self.double_down_bets.append(False)
+        self.hand_sums.append(0)
+        self.counted_hand_sums.append(0)
+        self.aces_amounts.append(0)
+        self.bust.append(False)
+        self.add_card(game.stack.pop(), hand_idx)
+        self.add_card(game.stack.pop(), len(self.hands)-1)
+        self.move_histories.append([])
+        self.move_histories.append([])
+        
         
     def clear_hands(self):
         self.hands = [[]]
@@ -163,6 +181,7 @@ class Player:
         self.bust = [False]
         self.round_result = None
         self.move_histories = []
+
 
     def get_results(self, game, hand_idx):
         return {
