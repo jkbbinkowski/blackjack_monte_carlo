@@ -96,4 +96,4 @@ The simulator so far consists of one, non-sensitive configuration file. Below th
 | EXPORT_BUFFERING | for large number of probes, buffering will ensure that results will be saved to file periodically, thus keeping the simulation running fast and cleaning ram after each save | |
 | EXPORT_BUFFER_SIZE | numer of probes after which results will be saved to file and history stored in ram will be cleaned | | 
 | EXPORT_FILE_NAME | name of the file which will keep the results (at the end will be added date and time in format _yyyymmdd_hhmmss) | |
-| EXPORT_CSV_DELIMITER | delimiter in csv file | some of the data is saved as native python list in string, thus delimiter should be set carefully to ensure data integrity
+| EXPORT_CSV_DELIMITER | delimiter in csv file | some of the data is saved as native python list in string, thus delimiter should be set carefully to ensure data integrity |
