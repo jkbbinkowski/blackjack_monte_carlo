@@ -147,6 +147,9 @@ class Player:
                     if ((len(self.hands) == 1) or (int(game.config['BLACKJACK_AFTER_SPLIT_COUNTS_AS_21']) == 0)):
                         self.capital += (self.bets[hand_idx] * (float(game.config['BLACKJACK_PAYOUT']) + 1))
                         self.round_result = "blackjack"
+                    else:
+                        self.capital += (self.bets[hand_idx] * 2)
+                        self.round_result = "win"
                 elif (self.counted_hand_sums[hand_idx] > game.dealer.counted_hand_sum) or (game.dealer.bust):
                     self.capital += (self.bets[hand_idx] * 2)
                     self.round_result = "win"
