@@ -19,6 +19,7 @@ def basic_strategy(player, game):
     # check if player hands are pairs and split if needed
     basic_strategy_fnct.play_splits(player, game)
 
+    # play other hands according to basic strategy
     for hand in player.hands:
         local_move_history = []
         player.move_histories.append(local_move_history)
