@@ -83,6 +83,7 @@ class Player:
         self.insurance = False
         self.round_result = None
         self.move_histories = []
+        self.split_count = 0
 
 
     def place_new_bet(self, game):
@@ -198,6 +199,7 @@ class Player:
         self.bust = [False]
         self.round_result = None
         self.move_histories = []
+        self.split_count = 0
 
 
     def get_results(self, game, hand_idx):
@@ -220,6 +222,7 @@ class Player:
             "insurance": self.insurance,
             "round_result": self.round_result,
             "move_history": str(self.move_histories[hand_idx]),
+            "split_counter": self.split_count,
             "dealer_hand": str(game.dealer.hand),
             "dealer_hand_sum": game.dealer.hand_sum,
             "dealer_counted_hand_sum": game.dealer.counted_hand_sum,
