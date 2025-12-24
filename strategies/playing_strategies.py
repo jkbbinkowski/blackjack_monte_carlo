@@ -20,8 +20,7 @@ def basic_strategy(player, game):
     # check if player hands are pairs
     for hand_idx, player_hand in enumerate(player.hands):
         if player_hand[0] == player_hand[1]:
-            player.split_hand(hand_idx, game)
-            local_move_history.append("SP")
+            pass
             
 
 def dealer_strategy(dealer, game):
