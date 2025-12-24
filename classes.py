@@ -41,8 +41,10 @@ class Game:
         for i in range(int(self.config['BURN_CARDS_AMOUNT'])):
             self.stack.pop()
 
+
     def add_player(self, player):
         self.players.append(player)
+
 
     def deal_initial_cards(self):
         # Shuffle stack if needed
@@ -55,6 +57,7 @@ class Game:
             if ("american" in self.dealer.config["HOLE_CARD"]) or (("european" in self.dealer.config["HOLE_CARD"]) and (i == 0)):
                 self.dealer.add_card(self.stack.pop())
         self.dealer_face_card = self.dealer.hand[0]
+
 
     def clear_hands(self):
         for player in self.players:
@@ -107,22 +110,27 @@ class Player:
         if self.counted_hand_sums[hand_idx] > 21:
             self.bust[hand_idx] = True
 
+
     def has_soft_hand(self, hand_idx):
         has_soft_hand = (self.aces_amounts[hand_idx] > 0) and ((self.hand_sums[hand_idx] - self.counted_hand_sums[hand_idx]) < (self.aces_amounts[hand_idx]*10))
         return has_soft_hand
 
+
     def play_hand(self, game):
         strategies.config_playing_strategy(self, game)
+
 
     def play_insurance(self, game):
         if int(game.config['INSURANCE_ALLOWED']) == 1:
             if game.dealer_face_card == 11:
                 strategies.config_insurance_strategy(self, game)
 
+
     def evaluate_insurance_result(self, game):
         if self.insurance:
             if game.dealer.peek_has_blackjack:
                 self.capital += (self.bets[0]/2) * (int(game.config['INSURANCE_PAYOUT']) + 1)
+
 
     def evaluate_hand_result(self, game):
         round_results = []
@@ -176,8 +184,6 @@ class Player:
         self.bust.append(False)
         self.add_card(game.stack.pop(), hand_idx)
         self.add_card(game.stack.pop(), len(self.hands)-1)
-        self.move_histories.append([])
-        self.move_histories.append([])
         
         
     def clear_hands(self):
@@ -233,6 +239,7 @@ class Dealer:
         self.peek_has_blackjack = False
         self.bust = False
 
+
     def add_card(self, card):
         self.hand.append(card)
         self.hand_sum = sum(self.hand)
@@ -244,9 +251,11 @@ class Dealer:
         if self.counted_hand_sum > 21:
             self.bust = True
 
+
     def has_soft_hand(self):
         has_soft_hand = (self.aces_amount > 0) and ((self.hand_sum - self.counted_hand_sum) < (self.aces_amount*10))
         return has_soft_hand
+
 
     def peek(self):
         if self.config["HOLE_CARD"] == "american_peek":
@@ -258,6 +267,7 @@ class Dealer:
                 self.peek_has_blackjack = True
                 return True
         return False
+
 
     def play_hand(self, game):
         # Check if ALL of the players busted or surrendered (then dealer doesn't make any moves later)
@@ -276,6 +286,7 @@ class Dealer:
                     self.peek_has_blackjack = True
             strategies.config_dealer_strategy(self, game)
             
+
     def clear_hands(self):
         self.hand = []
         self.hand_sum = 0
@@ -298,20 +309,24 @@ class Results:
             self.create_directory()
             self.create_file()
 
+
     def create_directory(self):
         if not os.path.exists(self.folder_name):
             os.makedirs(self.folder_name)
     
+
     def create_file(self):
         if not os.path.exists(self.file_path):
             with open(self.file_path, 'w') as f:
                 f.write('')
         
+
     def add_result(self, result):
         self.results_history.append(result)
         if int(self.config['EXPORT_BUFFERING']) == 1 and int(self.config['EXPORT_CSV']) == 1:
             if len(self.results_history) >= int(self.config['EXPORT_BUFFER_SIZE']):
                 self.export_results()
+
 
     def export_results(self):
         if int(self.config['EXPORT_CSV']) == 1:
