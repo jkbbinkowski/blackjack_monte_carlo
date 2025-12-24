@@ -24,6 +24,7 @@ class Deck:
 
 class Game:
     def __init__(self):
+        self.round = 0
         self.config = config['GAME']
         self.shuffle_stack()
         self.dealer = Dealer()
@@ -85,6 +86,16 @@ class Player:
         strategies.config_betting_strategy(self, game)
 
 
+    def add_bet_after_split(self, game):
+        bet = self.bets[0]
+        if bet > self.capital:
+            raise ValueError("Bet is greater than capital")
+        elif bet > int(game.config['MAX_BET']):
+            raise ValueError("Bet is greater than max bet")
+        self.capital -= bet
+        self.bets.append(bet)
+
+
     def add_card(self, card, hand_idx):
         self.hands[hand_idx].append(card)
         self.hand_sums[hand_idx] = sum(self.hands[hand_idx])
@@ -133,7 +144,7 @@ class Player:
                 # Check if player has natural blackjack 
                 elif (self.counted_hand_sums[hand_idx] == 21) and (len(self.hands[hand_idx]) == 2):
                     # Check if natural blackjack is after split (config dependent)
-                    if ((hand_idx == 0) or (int(game.config['BLACKJACK_AFTER_SPLIT_COUNTS_AS_21']) == 0)):
+                    if ((len(self.hands) == 1) or (int(game.config['BLACKJACK_AFTER_SPLIT_COUNTS_AS_21']) == 0)):
                         self.capital += (self.bets[hand_idx] * (float(game.config['BLACKJACK_PAYOUT']) + 1))
                         self.round_result = "blackjack"
                 elif (self.counted_hand_sums[hand_idx] > game.dealer.counted_hand_sum) or (game.dealer.bust):
@@ -154,7 +165,7 @@ class Player:
     def split_hand(self, hand_idx, game):
         card = self.hands[hand_idx].pop()
         self.hands.append([card])
-        self.place_new_bet(game)
+        self.add_bet_after_split(game)
         self.double_down_bets.append(False)
         self.hand_sums.append(0)
         self.counted_hand_sums.append(0)
@@ -182,6 +193,7 @@ class Player:
 
     def get_results(self, game, hand_idx):
         return {
+            "round": game.round,
             "player_idx": self.idx,
             "hand_idx": hand_idx,
             "playing_strategy": self.playing_strategy,

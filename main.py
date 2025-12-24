@@ -21,6 +21,9 @@ for player in players:
 
 # Run simulation
 for i in tqdm.tqdm(range(int(config['SIMULATION']['PROBES']))):
+    # Begin new round
+    game.round += 1
+
     # Place bets before play
     for player in players:
         player.place_new_bet(game)
