@@ -3,7 +3,7 @@ import configparser
 from .betting_strategies import *
 from .playing_strategies import *
 from .insurance_strategies import *
-
+from .surrender_strategies import *
 
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -32,6 +32,11 @@ def config_insurance_strategy(player, game):
         always_play_insurance(player, game)
     else:
         raise ValueError("Invalid insurance strategy")
+
+
+def config_surrender_strategy(player, game):
+    if player.playing_strategy == 'basic_strategy':
+        basic_strategy_surrender(player, game)
 
 
 def config_dealer_strategy(dealer, game):

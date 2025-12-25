@@ -1,11 +1,7 @@
 # evaluate basic strategy move based on tables and rules
 def evaluate_move(game, player, hand_idx, move):
     # evaluate move based of S17/H17 rule
-    if '/' in move:
-        if int(game.dealer.config['HIT_ON_SOFT_17']) == 1:
-            move = move.split('/')[0]
-        elif int(game.dealer.config['HIT_ON_SOFT_17']) == 0:
-            move = move.split('/')[1]
+    move = restrict_strategy(game, move)
     # evaluate possible surrender moves (since this function is used later on during play, not at the surrendering stage it changes to S/H)
     if move == 'Us':
         return 'S'
@@ -36,6 +32,17 @@ def evaluate_move(game, player, hand_idx, move):
             return 'D'
 
     return move
+
+# evaluate based on H17/S17
+def restrict_strategy(game, move):
+    if '/' in move:
+        if int(game.dealer.config['HIT_ON_SOFT_17']) == 1:
+            move = move.split('/')[0]
+        elif int(game.dealer.config['HIT_ON_SOFT_17']) == 0:
+            move = move.split('/')[1]
+
+    return move
+
 
 # play splits according to game rules
 def play_splits(player, game):
@@ -75,6 +82,27 @@ def play_move(player, game, move, hand_idx):
     elif move == 'D':
         player.add_double_down_bet(game, hand_idx)
         player.add_card(game.stack.pop(), hand_idx)
+
+
+def surrender(player, game):
+    # pairs logic
+    if player.hands[0][0] == player.hands[0][1]:
+        move = pairs_table[player.hands[0][0]][game.dealer_face_card]
+        if 'U' in move:
+            player.surrender = True
+    # soft hand logic
+    elif player.has_soft_hand(0):
+        soft_value = player.counted_hand_sums[0] - 11
+        move = soft_hand_table[soft_value][game.dealer_face_card]
+        if 'U' in move:
+            player.surrender = True
+    # hard hand logic
+    elif player.counted_hand_sums[0] < 22:
+        move = hard_hand_table[player.counted_hand_sums[0]][game.dealer_face_card]
+        if 'U' in move:
+            player.surrender = True
+
+    player.move_histories.append([])
 
 
 # table for pairs

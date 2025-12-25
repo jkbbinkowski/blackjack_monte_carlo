@@ -210,6 +210,10 @@ class Player:
                 self.natural_blackjacks[hand_idx] = True
             if self.counted_hand_sums[-1] == 21:
                 self.natural_blackjacks[-1] = True
+
+
+    def play_surrender(self, game):
+        strategies.config_surrender_strategy(self, game)
         
         
     def clear_hands(self):

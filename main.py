@@ -35,6 +35,9 @@ for i in tqdm.tqdm(range(int(config['SIMULATION']['PROBES']))):
     for player in players:
         player.play_insurance(game)
 
+    if game.config['SURRENDER_TYPE'] == 'early':
+        player.play_surrender(game)
+
     # Check if dealer has blackjack (peek according to config)
     if game.dealer.peek():
         # If dealer has blackjack, evaluate insurance and hand results
