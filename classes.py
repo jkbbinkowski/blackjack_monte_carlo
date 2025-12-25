@@ -208,8 +208,8 @@ class Player:
         if int(game.config['BLACKJACK_AFTER_SPLIT_COUNTS_AS_21']) == 0:
             if self.counted_hand_sums[hand_idx] == 21:
                 self.natural_blackjacks[hand_idx] = True
-            if self.counted_hand_sums[hand_idx+1] == 21:
-                self.natural_blackjacks[hand_idx+1] = True
+            if self.counted_hand_sums[-1] == 21:
+                self.natural_blackjacks[-1] = True
         
         
     def clear_hands(self):
