@@ -1,4 +1,4 @@
-from . import basic_strategy as basic_strategy_fnct
+from . import basic_strategy as basic_strategy_
 
 def mimic_the_dealer(player, game):
     local_move_history = []
@@ -17,11 +17,14 @@ def mimic_the_dealer(player, game):
 
 def basic_strategy(player, game):
     # check if player hands are pairs and split if needed
-    basic_strategy_fnct.play_splits(player, game)
+    basic_strategy_.play_splits(player, game)
 
     # play other hands according to basic strategy
-    for hand in player.hands:
+    for hand_idx, hand in enumerate(player.hands):
         local_move_history = []
+        move = ''
+        #while move != 'S':
+        print(player.has_soft_hand(hand_idx))
         player.move_histories.append(local_move_history)
             
 
