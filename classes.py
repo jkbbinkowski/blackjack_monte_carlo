@@ -58,6 +58,11 @@ class Game:
                 self.dealer.add_card(self.stack.pop())
         self.dealer_face_card = self.dealer.hand[0]
 
+        for player in self.players:
+            for hand_idx, counted_hand_sum in enumerate(player.counted_hand_sums):
+                if counted_hand_sum == 21:
+                    player.natural_blackjacks[hand_idx] = True
+
 
     def clear_hands(self):
         for player in self.players:
@@ -78,12 +83,14 @@ class Player:
         self.hand_sums = [0]
         self.counted_hand_sums = [0]
         self.aces_amounts = [0]
+        self.frozen_hands = [False]
         self.bust = [False]
         self.surrender = False
         self.insurance = False
         self.round_result = None
         self.move_histories = []
         self.split_count = 0
+        self.natural_blackjacks = [False]
 
 
     def place_new_bet(self, game):
@@ -157,18 +164,19 @@ class Player:
                 if self.bust[hand_idx]:
                     self.round_result = "bust"
                 # Check if player hand is equal to dealer hand sum
-                elif (self.counted_hand_sums[hand_idx] <= 21 and self.counted_hand_sums[hand_idx] == game.dealer.counted_hand_sum):
+                elif (not self.natural_blackjacks[hand_idx]) and (self.counted_hand_sums[hand_idx] == game.dealer.counted_hand_sum):
+                    if game.dealer.natural_blackjack:
+                        self.round_result = "lose"
+                    else:
+                        self.capital += (self.bets[hand_idx])
+                        self.round_result = "push"
+                # Check if player has natural blackjack 
+                elif (self.natural_blackjacks[hand_idx]) and (not game.dealer.natural_blackjack):
+                    self.capital += (self.bets[hand_idx] * (float(game.config['BLACKJACK_PAYOUT']) + 1))
+                    self.round_result = "blackjack"
+                elif self.natural_blackjacks[hand_idx] and (game.dealer.natural_blackjack):
                     self.capital += (self.bets[hand_idx])
                     self.round_result = "push"
-                # Check if player has natural blackjack 
-                elif (self.counted_hand_sums[hand_idx] == 21) and (len(self.hands[hand_idx]) == 2):
-                    # Check if natural blackjack is after split (config dependent)
-                    if ((len(self.hands) == 1) or (int(game.config['BLACKJACK_AFTER_SPLIT_COUNTS_AS_21']) == 0)):
-                        self.capital += (self.bets[hand_idx] * (float(game.config['BLACKJACK_PAYOUT']) + 1))
-                        self.round_result = "blackjack"
-                    else:
-                        self.capital += (self.bets[hand_idx] * 2)
-                        self.round_result = "win"
                 elif (self.counted_hand_sums[hand_idx] > game.dealer.counted_hand_sum) or (game.dealer.bust):
                     self.capital += (self.bets[hand_idx] * 2)
                     self.round_result = "win"
@@ -192,9 +200,16 @@ class Player:
         self.hand_sums.append(0)
         self.counted_hand_sums.append(0)
         self.aces_amounts.append(0)
+        self.frozen_hands.append(False)
         self.bust.append(False)
+        self.natural_blackjacks.append(False)
         self.add_card(game.stack.pop(), hand_idx)
         self.add_card(game.stack.pop(), len(self.hands)-1)
+        if int(game.config['BLACKJACK_AFTER_SPLIT_COUNTS_AS_21']) == 0:
+            if self.counted_hand_sums[hand_idx] == 21:
+                self.natural_blackjacks[hand_idx] = True
+            if self.counted_hand_sums[hand_idx+1] == 21:
+                self.natural_blackjacks[hand_idx+1] = True
         
         
     def clear_hands(self):
@@ -204,12 +219,14 @@ class Player:
         self.hand_sums = [0]
         self.counted_hand_sums = [0]
         self.aces_amounts = [0]
+        self.frozen_hands = [False]
         self.surrender = False
         self.insurance = False
         self.bust = [False]
         self.round_result = None
         self.move_histories = []
         self.split_count = 0
+        self.natural_blackjacks = [False]
 
 
     def get_results(self, game, hand_idx):
@@ -227,18 +244,21 @@ class Player:
             "hand_sum": self.hand_sums[hand_idx],
             "counted_hand_sum": self.counted_hand_sums[hand_idx],
             "aces_amount": self.aces_amounts[hand_idx],
+            "hand_frozen": self.frozen_hands[hand_idx],
             "bust": self.bust[hand_idx],
             "surrender": self.surrender,
             "insurance": self.insurance,
             "round_result": self.round_result,
             "move_history": str(self.move_histories[hand_idx]),
             "split_counter": self.split_count,
+            "natural_blackjack": self.natural_blackjacks[hand_idx],
             "dealer_hand": str(game.dealer.hand),
             "dealer_hand_sum": game.dealer.hand_sum,
             "dealer_counted_hand_sum": game.dealer.counted_hand_sum,
             "dealer_aces_amount": game.dealer.aces_amount,
             "dealer_bust": game.dealer.bust,
             "dealer_peek_has_blackjack": game.dealer.peek_has_blackjack,
+            "dealer_natural_blackjack": game.dealer.natural_blackjack
         }
 
 
@@ -251,6 +271,7 @@ class Dealer:
         self.aces_amount = 0
         self.peek_has_blackjack = False
         self.bust = False
+        self.natural_blackjack = False
 
 
     def add_card(self, card):
@@ -274,24 +295,29 @@ class Dealer:
         if self.config["HOLE_CARD"] == "american_peek":
             if ((10 in self.hand) and (11 in self.hand)):
                 self.peek_has_blackjack = True
+                self.natural_blackjack = True
                 return True
         elif self.config["HOLE_CARD"] == "american_peek_ace_only":
             if (self.hand[0] == 11) and (self.hand[1] == 10):
                 self.peek_has_blackjack = True
+                self.natural_blackjack = True
                 return True
         return False
 
 
     def play_hand(self, game):
-        # Check if ALL of the players busted or surrendered (then dealer doesn't make any moves later)
-        all_players_busted_or_surrendered = True
+        if self.counted_hand_sum == 21:
+            self.natural_blackjack = True
+
+        # Check if ALL of the players busted or surrendered or all hands are natural blackjack (then dealer doesn't make any moves later)
+        all_players_busted_or_surrendered_or_all_natural_blackjacks = True
         for player in game.players:
             for hand_idx in range(len(player.hands)):
-                if (not player.bust[hand_idx]) and (not player.surrender):
-                    all_players_busted_or_surrendered = False
+                if (not player.bust[hand_idx]) and (not player.surrender) and (not player.natural_blackjacks[hand_idx]):
+                    all_players_busted_or_surrendered_or_all_natural_blackjacks = False
                     break
 
-        if not all_players_busted_or_surrendered:
+        if not all_players_busted_or_surrendered_or_all_natural_blackjacks:
             if "european" in self.config["HOLE_CARD"]:
                 self.add_card(game.stack.pop())
                 # Check if dealer has blackjack right after receiving the second card (only in european version to ensure insurance evaluation is correct)
@@ -307,6 +333,7 @@ class Dealer:
         self.aces_amount = 0
         self.peek_has_blackjack = False
         self.bust = False
+        self.natural_blackjack = False
 
 
 class Results:
