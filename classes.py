@@ -10,16 +10,20 @@ config.read('config.ini')
 
 
 class Deck:
-    def __init__(self):
-        self.cards = []
-        for i in range(2, 15):
-            if i == 11 or i == 12 or i == 13:
-                self.cards.append(10)
-            elif i == 14:
-                self.cards.append(11)
-            else:
-                self.cards.append(i)
-        self.cards = self.cards * 4
+    base_cards = []
+    for i in range(2, 15):
+        if i == 11 or i == 12 or i == 13:
+            base_cards.append(10)
+        elif i == 14:
+            base_cards.append(11)
+        else:
+            base_cards.append(i)
+    base_cards = base_cards * 4
+
+    
+    @staticmethod
+    def get_standard_deck():
+        return Deck.base_cards[:]
 
 
 class Game:
@@ -35,12 +39,13 @@ class Game:
 
     def shuffle_stack(self):
         # Shuffle stack
-        self.stack = Deck().cards * int(self.config['DECKS_AMOUNT'])
+        self.stack = Deck.get_standard_deck() * int(self.config['DECKS_AMOUNT'])
         random.shuffle(self.stack)
         
         # Burn cards
-        for i in range(int(self.config['BURN_CARDS_AMOUNT'])):
-            self.stack.pop()
+        burn_amount = int(self.config['BURN_CARDS_AMOUNT'])
+        if burn_amount > 0:
+            self.stack = self.stack[:-burn_amount]
 
 
     def add_player(self, player):
@@ -371,7 +376,7 @@ class Results:
             return
 
         self.results_history.append(result)
-        
+
         if int(self.config['EXPORT_BUFFERING']) == 1 and int(self.config['EXPORT_CSV']) == 1:
             if len(self.results_history) >= int(self.config['EXPORT_BUFFER_SIZE']):
                 self.export_results()
