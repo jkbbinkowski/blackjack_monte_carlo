@@ -14,12 +14,16 @@ def evaluate_move(game, player, hand_idx, move):
             return 'H'
         elif (len(player.hands) > 1) and (int(game.config['DOUBLE_AFTER_SPLIT']) == 0):
             return 'H'
+        elif len(player.hands[hand_idx]) > 2:
+            return 'H'
         else:
             return 'D'
     elif move == 'Ds':
         if (player.counted_hand_sums[hand_idx] < int(game.config['MIN_DOUBLE_DOWN_SUM'])) or (player.counted_hand_sums[hand_idx] > int(game.config['MAX_DOUBLE_DOWN_SUM'])):
             return 'S'
         elif (len(player.hands) > 1) and (int(game.config['DOUBLE_AFTER_SPLIT']) == 0):
+            return 'S'
+        elif len(player.hands[hand_idx]) > 2:
             return 'S'
         else:
             return 'D'
@@ -45,6 +49,15 @@ def play_splits(player, game):
         hand_idx += 1
 
     player.split_count = split_counter
+
+
+# play moves
+def play_move(player, game, move, hand_idx):
+    if move == 'H':
+        player.add_card(game.stack.pop(), hand_idx)
+    elif move == 'D':
+        player.add_double_down_bet(game, hand_idx)
+        player.add_card(game.stack.pop(), hand_idx)
 
 
 pairs_table = {
@@ -91,5 +104,6 @@ hard_hand_table = {
     8: {2: 'H', 3: 'H', 4: 'H', 5: 'H', 6: 'H', 7: 'H', 8: 'H', 9: 'H', 10: 'H', 11: 'H'},
     7: {2: 'H', 3: 'H', 4: 'H', 5: 'H', 6: 'H', 7: 'H', 8: 'H', 9: 'H', 10: 'H', 11: 'H'},
     6: {2: 'H', 3: 'H', 4: 'H', 5: 'H', 6: 'H', 7: 'H', 8: 'H', 9: 'H', 10: 'H', 11: 'H'},
-    5: {2: 'H', 3: 'H', 4: 'H', 5: 'H', 6: 'H', 7: 'H', 8: 'H', 9: 'H', 10: 'H', 11: 'H'} 
+    5: {2: 'H', 3: 'H', 4: 'H', 5: 'H', 6: 'H', 7: 'H', 8: 'H', 9: 'H', 10: 'H', 11: 'H'},
+    4: {2: 'H', 3: 'H', 4: 'H', 5: 'H', 6: 'H', 7: 'H', 8: 'H', 9: 'H', 10: 'H', 11: 'H'}
 }

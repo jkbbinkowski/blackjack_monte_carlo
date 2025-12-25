@@ -100,6 +100,16 @@ class Player:
         self.bets.append(bet)
 
 
+    def add_double_down_bet(self, game, hand_idx):
+        bet = self.bets[hand_idx]
+        if bet > self.capital:
+            raise ValueError("Bet is greater than capital")
+        elif bet > int(game.config['MAX_BET']):
+            raise ValueError("Bet is greater than max bet")
+        self.capital -= bet
+        self.bets[hand_idx] += bet
+
+
     def add_card(self, card, hand_idx):
         self.hands[hand_idx].append(card)
         self.hand_sums[hand_idx] = sum(self.hands[hand_idx])
@@ -110,7 +120,7 @@ class Player:
                 self.counted_hand_sums[hand_idx] -= 10
         if self.counted_hand_sums[hand_idx] > 21:
             self.bust[hand_idx] = True
-
+        
 
     def has_soft_hand(self, hand_idx):
         has_soft_hand = (self.aces_amounts[hand_idx] > 0) and ((self.hand_sums[hand_idx] - self.counted_hand_sums[hand_idx]) < (self.aces_amounts[hand_idx]*10))

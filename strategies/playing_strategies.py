@@ -16,15 +16,35 @@ def mimic_the_dealer(player, game):
 
 
 def basic_strategy(player, game):
-    # check if player hands are pairs and split if needed
+    # check if player hands are pairs and split if needed according to config
     basic_strategy_.play_splits(player, game)
 
     # play other hands according to basic strategy
     for hand_idx, hand in enumerate(player.hands):
         local_move_history = []
         move = ''
-        #while move != 'S':
-        print(player.has_soft_hand(hand_idx))
+        while move != 'S':
+            # soft hand logic
+            if player.has_soft_hand(hand_idx) and (hand != [11, 11]):
+                soft_value = player.counted_hand_sums[hand_idx] - 11
+                move = basic_strategy_.soft_hand_table[soft_value][game.dealer_face_card]
+                move = basic_strategy_.evaluate_move(game, player, hand_idx, move)
+                basic_strategy_.play_move(player, game, move, hand_idx)
+                local_move_history.append(move)
+            # hard hand logic
+            elif player.counted_hand_sums[hand_idx] < 22:
+                move = basic_strategy_.hard_hand_table[player.counted_hand_sums[hand_idx]][game.dealer_face_card]
+                move = basic_strategy_.evaluate_move(game, player, hand_idx, move)
+                basic_strategy_.play_move(player, game, move, hand_idx)
+                local_move_history.append(move)
+            # necessary logic for busts for while loop to finish
+            else:
+                move = 'S'
+
+            # ensure that after double down no move is possible
+            if move == 'D':
+                move = 'S'
+        
         player.move_histories.append(local_move_history)
             
 
