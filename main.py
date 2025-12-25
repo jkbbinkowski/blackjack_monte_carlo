@@ -35,6 +35,7 @@ for i in tqdm.tqdm(range(int(config['SIMULATION']['PROBES']))):
     for player in players:
         player.play_insurance(game)
 
+    # Evaluate early surrender
     if game.config['SURRENDER_TYPE'] == 'early':
         player.play_surrender(game)
 
@@ -45,9 +46,14 @@ for i in tqdm.tqdm(range(int(config['SIMULATION']['PROBES']))):
             player.evaluate_insurance_result(game)
             player.evaluate_hand_result(game)
     else:
+        # Evaluate late surrender
+        if game.config['SURRENDER_TYPE'] == 'late':
+            player.play_surrender(game)
+
         # Play hands and dealer hand if dealer does not have blackjack
         for player in players:
-            player.play_hand(game)
+            if not player.surrender:
+                player.play_hand(game)
 
         # Play dealer hand
         game.dealer.play_hand(game)

@@ -102,7 +102,8 @@ def surrender(player, game):
         if 'U' in move:
             player.surrender = True
 
-    player.move_histories.append([])
+    if player.surrender == True:
+        player.move_histories.append([])
 
 
 # table for pairs
