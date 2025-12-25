@@ -25,7 +25,7 @@ def basic_strategy(player, game):
         move = ''
         while move != 'S':
             # soft hand logic
-            if player.has_soft_hand(hand_idx) and (hand != [11, 11]):
+            if player.has_soft_hand(hand_idx):
                 soft_value = player.counted_hand_sums[hand_idx] - 11
                 move = basic_strategy_.soft_hand_table[soft_value][game.dealer_face_card]
                 move = basic_strategy_.evaluate_move(game, player, hand_idx, move)
