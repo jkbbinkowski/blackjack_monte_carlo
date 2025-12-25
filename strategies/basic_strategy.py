@@ -39,6 +39,7 @@ def evaluate_move(game, player, hand_idx, move):
 
 # play splits according to game rules
 def play_splits(player, game):
+    aces_split_counter = 0
     split_counter = 0
     hand_idx = 0
     while hand_idx < len(player.hands):
@@ -46,10 +47,19 @@ def play_splits(player, game):
             move = pairs_table[player.hands[hand_idx][0]][game.dealer_face_card]
             move = evaluate_move(game, player, hand_idx, move)
             if move == 'SP':
-                if split_counter < int(game.config['MAX_SPLIT_AMOUNT']):
-                    player.split_hand(hand_idx, game)
-                    split_counter += 1
-                    continue
+                if (split_counter < int(game.config['MAX_SPLIT_AMOUNT'])):
+                    if player.hands[hand_idx][0] == 11:
+                        if (int(game.config['RESPLIT_ACES']) == 1) or ((int(game.config['RESPLIT_ACES']) == 0) and (aces_split_counter == 0)):
+                            player.split_hand(hand_idx, game)
+                            split_counter += 1
+                            if player.hands[hand_idx][0] == 11:
+                                aces_split_counter += 1
+                            continue
+                    else:
+                        player.split_hand(hand_idx, game)
+                        split_counter += 1
+                        continue
+
 
         hand_idx += 1
 
