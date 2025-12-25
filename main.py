@@ -68,3 +68,6 @@ for i in tqdm.tqdm(range(int(config['SIMULATION']['PROBES']))):
 
 if int(config['SIMULATION']['EXPORT_CSV']) == 1:
     game.results.export_results()
+
+for player in players:
+    print(player.capital)

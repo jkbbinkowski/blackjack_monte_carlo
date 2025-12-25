@@ -32,6 +32,7 @@ class Game:
         self.results = Results()
         self.dealer_face_card = None
         
+
     def shuffle_stack(self):
         # Shuffle stack
         self.stack = Deck().cards * int(self.config['DECKS_AMOUNT'])
@@ -366,7 +367,11 @@ class Results:
         
 
     def add_result(self, result):
+        if int(self.config['EXPORT_CSV']) == 0:
+            return
+
         self.results_history.append(result)
+        
         if int(self.config['EXPORT_BUFFERING']) == 1 and int(self.config['EXPORT_CSV']) == 1:
             if len(self.results_history) >= int(self.config['EXPORT_BUFFER_SIZE']):
                 self.export_results()
