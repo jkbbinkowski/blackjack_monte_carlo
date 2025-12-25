@@ -43,7 +43,6 @@ The simulator so far consists of one, non-sensitive configuration file. Below th
 | RESPLIT_ACES | BOOL | is it allowed to split aces more than once per round (if 0 player can only split first pair A-A; if 1 player can split further possible A-A pairs up to the MAX_SPLIT_LIMIT) |
 | PLAY_SPLIT_ACES | BOOL | is it allowed to further play after splitting aces (if 0, after splitting A-A player will receive only one additional card per hand without ability to make any move) |
 | BLACKJACK_AFTER_SPLIT_COUNTS_AS_21 | BOOL | does blackjack after splitting (A + 10pt. card) pays as blackjack (if 1 A+10pt. after splitting pays normal; if 0 A+10pt. after splitting pays as blackjack) | 
-| ALLOW_SPLIT_TENS | BOOL | is it allowed to split pairs with 10 value (ex, 10-10, K-K) |
 | SURRENDER_TYPE | STRING | type of surrender, see options below |
 | INSURANCE_ALLOWED | BOOL | is insurance allowed |
 | INSURANCE_PAYOUT | FLOAT | payout multiplier for insurance (ex. 2:1, set value to 2) |

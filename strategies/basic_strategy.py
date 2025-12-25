@@ -65,6 +65,7 @@ def play_move(player, game, move, hand_idx):
         player.add_card(game.stack.pop(), hand_idx)
 
 
+# table for pairs
 pairs_table = {
     11: {2: 'SP', 3: 'SP', 4: 'SP', 5: 'SP', 6: 'SP', 7: 'SP', 8: 'SP', 9: 'SP', 10: 'SP', 11: 'SP'},
     10: {2: 'S', 3: 'S', 4: 'S', 5: 'S', 6: 'S', 7: 'S', 8: 'S', 9: 'S', 10: 'S', 11: 'S'},
@@ -78,7 +79,7 @@ pairs_table = {
     2: {2: 'SP', 3: 'SP', 4: 'SP', 5: 'SP', 6: 'SP', 7: 'SP', 8: 'H', 9: 'H', 10: 'H', 11: 'H'}
 }
 
-
+# table for soft hand, the key indicates (hand_sum - 11) / requires defining 10 (which is 10+11 = 21 so blackjack) since result evaluation goes after making moves. For 10 move shall always be stand, since player is not allowed to do anything in this situation
 soft_hand_table = {
     10: {2: 'S', 3: 'S', 4: 'S', 5: 'S', 6: 'S', 7: 'S', 8: 'S', 9: 'S', 10: 'S', 11: 'S'},
     9: {2: 'S', 3: 'S', 4: 'S', 5: 'S', 6: 'S', 7: 'S', 8: 'S', 9: 'S', 10: 'S', 11: 'S'},
@@ -92,7 +93,7 @@ soft_hand_table = {
     1: {2: 'H', 3: 'H', 4: 'H', 5: 'H', 6: 'H', 7: 'H', 8: 'H', 9: 'H', 10: 'H', 11: 'H'} # !!! THIS IS VERY SPECIFIC SITUATION THAT REQUIRES FURTHER RESEARCH (two aces but further splitting is not allowed) !!!
 }
 
-
+# table for hard hand 
 hard_hand_table = {
     21: {2: 'S', 3: 'S', 4: 'S', 5: 'S', 6: 'S', 7: 'S', 8: 'S', 9: 'S', 10: 'S', 11: 'S'},
     20: {2: 'S', 3: 'S', 4: 'S', 5: 'S', 6: 'S', 7: 'S', 8: 'S', 9: 'S', 10: 'S', 11: 'S'},
