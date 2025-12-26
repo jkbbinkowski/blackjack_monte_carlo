@@ -31,7 +31,7 @@ class Game:
         self.round = 0
         self.config = config['GAME']
         self.shuffle_stack()
-        self.dealer = Dealer()
+        self.dealer = Dealer(self)
         self.players = []
         self.results = Results()
         self.dealer_face_card = None
@@ -85,8 +85,9 @@ class Game:
 
 
 class Player:
-    def __init__(self, idx):
+    def __init__(self, idx, game):
         self.idx = idx
+        self.game = game
         self.playing_strategy = [x.strip() for x in config['PLAYERS']['PLAYING_STRATEGIES'].split(',')][idx]
         self.betting_strategy = [x.strip() for x in config['PLAYERS']['BETTING_STRATEGIES'].split(',')][idx]
         self.insurance_strategy = [x.strip() for x in config['PLAYERS']['INSURANCE_STRATEGIES'].split(',')][idx]
@@ -141,6 +142,9 @@ class Player:
                 self.counted_hand_sums[hand_idx] -= 10
         if self.counted_hand_sums[hand_idx] > 21:
             self.bust[hand_idx] = True
+
+        self.game.used_cards_amount += 1
+        print(self.game.used_cards_amount)
         
 
     def has_soft_hand(self, hand_idx):
@@ -281,8 +285,9 @@ class Player:
 
 
 class Dealer:
-    def __init__(self):
+    def __init__(self, game):
         self.config = config['DEALER']
+        self.game = game
         self.hand = []
         self.hand_sum = 0
         self.counted_hand_sum = 0
@@ -302,6 +307,9 @@ class Dealer:
                 self.counted_hand_sum -= 10
         if self.counted_hand_sum > 21:
             self.bust = True
+
+        self.game.used_cards_amount += 1
+        print(self.game.used_cards_amount)
 
 
     def has_soft_hand(self):

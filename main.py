@@ -7,13 +7,17 @@ config = configparser.ConfigParser()
 config.read('config.ini')
 
 
+# Create game object
+game = classes.Game()
+
+
 # Create players based on config
 players = []
 for i in range(int(config['PLAYERS']['AMOUNT'])):
-    players.append(classes.Player(i))
+    players.append(classes.Player(i, game))
 
 # Create game object
-game = classes.Game()
+# game = classes.Game()
 
 # Add players to the game
 for player in players:
@@ -68,6 +72,3 @@ for i in tqdm.tqdm(range(int(config['SIMULATION']['PROBES']))):
 
 if int(config['SIMULATION']['EXPORT_CSV']) == 1:
     game.results.export_results()
-
-for player in players:
-    print(player.capital)
