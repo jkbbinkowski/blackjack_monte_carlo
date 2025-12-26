@@ -35,6 +35,9 @@ class Game:
         self.players = []
         self.results = Results()
         self.dealer_face_card = None
+        self.running_count = 0
+        self.true_count = 0
+        self.used_cards_amount = 0
         
 
     def shuffle_stack(self):
@@ -46,6 +49,11 @@ class Game:
         burn_amount = int(self.config['BURN_CARDS_AMOUNT'])
         if burn_amount > 0:
             self.stack = self.stack[:-burn_amount]
+
+        # Reset Hi-Lo counters
+        self.running_count = 0
+        self.true_count = 0
+        self.used_cards_amount = burn_amount
 
 
     def add_player(self, player):
