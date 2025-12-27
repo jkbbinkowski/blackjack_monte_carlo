@@ -90,11 +90,14 @@ class Game:
 
     def calculate_true_count(self, card):
         if card:
-            pass
+            if card <= 6:
+                self.running_count += 1
+            elif card >= 10:
+                self.running_count -= 1
         else:
             self.running_count = 0
         self.cards_at_stack_percentage = ((self.total_stack - self.used_cards_amount) / self.total_stack)
-        self.true_count = (self.running_count / (int(self.config['DECKS_AMOUNT']) * self.cards_at_stack_percentage))
+        self.true_count = round((self.running_count / (int(self.config['DECKS_AMOUNT']) * self.cards_at_stack_percentage)), 2)
 
 
 class Player:
@@ -290,6 +293,7 @@ class Player:
             "dealer_hand": str(game.dealer.hand),
             #"dealer_hand_sum": game.dealer.hand_sum,
             "dealer_counted_hand_sum": game.dealer.counted_hand_sum,
+            "running_count": game.running_count
             #"dealer_aces_amount": game.dealer.aces_amount,
             #"dealer_bust": game.dealer.bust,
             #"dealer_peek_has_blackjack": game.dealer.peek_has_blackjack,
@@ -346,6 +350,10 @@ class Dealer:
 
 
     def play_hand(self, game):
+        # before playing further simulate showing second dealers card for counting purpose
+        if 'american' in self.config['HOLE_CARD']:
+            game.calculate_true_count(self.hand[1])
+
         if self.counted_hand_sum == 21:
             self.natural_blackjack = True
 
