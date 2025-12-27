@@ -31,6 +31,7 @@ class Game:
         self.round = 0
         self.config = config['GAME']
         self.total_stack = (int(self.config['DECKS_AMOUNT']) * 52)
+        self.shuffle_counter = -1
         self.shuffle_stack()
         self.dealer = Dealer(self)
         self.players = []
@@ -46,6 +47,7 @@ class Game:
         # Shuffle stack
         self.stack = Deck.get_standard_deck() * int(self.config['DECKS_AMOUNT'])
         random.shuffle(self.stack)
+        self.shuffle_counter += 1
         
         # Burn cards
         burn_amount = int(self.config['BURN_CARDS_AMOUNT'])
@@ -96,7 +98,7 @@ class Game:
                 self.running_count -= 1
         else:
             self.running_count = 0
-        self.cards_at_stack_percentage = ((self.total_stack - self.used_cards_amount) / self.total_stack)
+        self.cards_at_stack_percentage = round(((self.total_stack - self.used_cards_amount) / self.total_stack), 2)
         self.true_count = round((self.running_count / (int(self.config['DECKS_AMOUNT']) * self.cards_at_stack_percentage)), 2)
 
 
@@ -270,6 +272,7 @@ class Player:
     def get_results(self, game, hand_idx):
         return {
             "round": game.round,
+            "shuffle_counter": game.shuffle_counter,
             "player_idx": self.idx,
             "hand_idx": hand_idx,
             #"playing_strategy": self.playing_strategy,
@@ -293,11 +296,14 @@ class Player:
             "dealer_hand": str(game.dealer.hand),
             #"dealer_hand_sum": game.dealer.hand_sum,
             "dealer_counted_hand_sum": game.dealer.counted_hand_sum,
-            "running_count": game.running_count
             #"dealer_aces_amount": game.dealer.aces_amount,
             #"dealer_bust": game.dealer.bust,
             #"dealer_peek_has_blackjack": game.dealer.peek_has_blackjack,
-            #"dealer_natural_blackjack": game.dealer.natural_blackjack
+            #"dealer_natural_blackjack": game.dealer.natural_blackjack,
+            "running_count": game.running_count,
+            "true_count": f'{ game.true_count }0'
+            #"cards_at_stack_percentage": game.cards_at_stack_percentage,
+            #"used_cards_amount": game.used_cards_amount
         }
 
 
