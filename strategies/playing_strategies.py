@@ -52,8 +52,8 @@ def basic_strategy(player, game):
 def dealer_strategy(dealer, game):
     if int(dealer.config["HIT_ON_SOFT_17"]) == 0:
         while dealer.counted_hand_sum < 17:
-            dealer.add_card(game.stack.pop())
+            dealer.add_card(game.stack.pop(), is_init=0)
             
     elif int(dealer.config["HIT_ON_SOFT_17"]) == 1:
         while (dealer.counted_hand_sum < 17) or (dealer.counted_hand_sum == 17 and dealer.has_soft_hand()):
-            dealer.add_card(game.stack.pop())
+            dealer.add_card(game.stack.pop(), is_init=0)

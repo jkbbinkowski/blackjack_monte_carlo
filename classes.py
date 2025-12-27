@@ -30,6 +30,7 @@ class Game:
     def __init__(self):
         self.round = 0
         self.config = config['GAME']
+        self.total_stack = (int(self.config['DECKS_AMOUNT']) * 52)
         self.shuffle_stack()
         self.dealer = Dealer(self)
         self.players = []
@@ -38,6 +39,7 @@ class Game:
         self.running_count = 0
         self.true_count = 0
         self.used_cards_amount = 0
+        self.cards_at_stack_percentage = 0
         
 
     def shuffle_stack(self):
@@ -47,13 +49,14 @@ class Game:
         
         # Burn cards
         burn_amount = int(self.config['BURN_CARDS_AMOUNT'])
-        if burn_amount > 0:
-            self.stack = self.stack[:-burn_amount]
+        for i in range(burn_amount):
+            self.stack.pop()
 
         # Reset Hi-Lo counters
         self.running_count = 0
         self.true_count = 0
         self.used_cards_amount = burn_amount
+        self.calculate_true_count(None)
 
 
     def add_player(self, player):
@@ -69,8 +72,9 @@ class Game:
             for player in self.players:
                 player.add_card(self.stack.pop(), 0)
             if ("american" in self.dealer.config["HOLE_CARD"]) or (("european" in self.dealer.config["HOLE_CARD"]) and (i == 0)):
-                self.dealer.add_card(self.stack.pop())
+                self.dealer.add_card(self.stack.pop(), is_init=1)
         self.dealer_face_card = self.dealer.hand[0]
+        self.calculate_true_count(self.dealer_face_card)
 
         for player in self.players:
             for hand_idx, counted_hand_sum in enumerate(player.counted_hand_sums):
@@ -82,6 +86,15 @@ class Game:
         for player in self.players:
             player.clear_hands()
         self.dealer.clear_hands()
+
+
+    def calculate_true_count(self, card):
+        if card:
+            pass
+        else:
+            self.running_count = 0
+        self.cards_at_stack_percentage = ((self.total_stack - self.used_cards_amount) / self.total_stack)
+        self.true_count = (self.running_count / (int(self.config['DECKS_AMOUNT']) * self.cards_at_stack_percentage))
 
 
 class Player:
@@ -144,7 +157,7 @@ class Player:
             self.bust[hand_idx] = True
 
         self.game.used_cards_amount += 1
-        print(self.game.used_cards_amount)
+        self.game.calculate_true_count(card)
         
 
     def has_soft_hand(self, hand_idx):
@@ -297,7 +310,7 @@ class Dealer:
         self.natural_blackjack = False
 
 
-    def add_card(self, card):
+    def add_card(self, card, is_init):
         self.hand.append(card)
         self.hand_sum = sum(self.hand)
         self.counted_hand_sum = self.hand_sum
@@ -309,7 +322,8 @@ class Dealer:
             self.bust = True
 
         self.game.used_cards_amount += 1
-        print(self.game.used_cards_amount)
+        if not is_init:
+            self.game.calculate_true_count(card)
 
 
     def has_soft_hand(self):
@@ -345,7 +359,7 @@ class Dealer:
 
         if not all_players_busted_or_surrendered_or_all_natural_blackjacks:
             if "european" in self.config["HOLE_CARD"]:
-                self.add_card(game.stack.pop())
+                self.add_card(game.stack.pop(), is_init=0)
                 # Check if dealer has blackjack right after receiving the second card (only in european version to ensure insurance evaluation is correct)
                 if self.counted_hand_sum == 21:
                     self.peek_has_blackjack = True
