@@ -10,14 +10,10 @@ config.read('config.ini')
 # Create game object
 game = classes.Game()
 
-
 # Create players based on config
 players = []
 for i in range(int(config['PLAYERS']['AMOUNT'])):
     players.append(classes.Player(i, game))
-
-# Create game object
-# game = classes.Game()
 
 # Add players to the game
 for player in players:
@@ -41,7 +37,8 @@ for i in tqdm.tqdm(range(int(config['SIMULATION']['PROBES']))):
 
     # Evaluate early surrender
     if game.config['SURRENDER_TYPE'] == 'early':
-        player.play_surrender(game)
+        for player in players:
+            player.play_surrender(game)
 
     # Check if dealer has blackjack (peek according to config)
     if game.dealer.peek():
