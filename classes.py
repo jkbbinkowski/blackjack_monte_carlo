@@ -99,7 +99,12 @@ class Game:
         else:
             self.running_count = 0
         self.cards_at_stack_percentage = round(((self.total_stack - self.used_cards_amount) / self.total_stack), 2)
-        self.true_count = round((self.running_count / (int(self.config['DECKS_AMOUNT']) * self.cards_at_stack_percentage)), 2)
+
+        #calculate remaining decks and round them to 0,5, to ensure reality and kelly criterion advices
+        decks_remaining = int(self.config['DECKS_AMOUNT']) * self.cards_at_stack_percentage
+        decks_remaining_rounded = max(0.5, round(decks_remaining * 2) / 2.0)
+
+        self.true_count = round((self.running_count / decks_remaining_rounded), 2)
 
 
 class Player:
@@ -121,6 +126,7 @@ class Player:
         self.surrender = False
         self.insurance = False
         self.round_result = None
+        self.round_result_stat = 0
         self.move_histories = []
         self.split_count = 0
         self.natural_blackjacks = [False]
@@ -184,6 +190,9 @@ class Player:
         if self.insurance:
             if game.dealer.peek_has_blackjack:
                 self.capital += (self.bets[0]/2) * (int(game.config['INSURANCE_PAYOUT']) + 1)
+                self.round_result_stat += 1
+            else:
+                self.round_result_stat -= 0.5
 
 
     def evaluate_hand_result(self, game):
@@ -199,10 +208,16 @@ class Player:
                 # Check if player busted
                 if self.bust[hand_idx]:
                     self.round_result = "bust"
+                    self.round_result_stat -= 1
+                    if self.double_down_bets[hand_idx]:
+                            self.round_result_stat -= 1
                 # Check if player hand is equal to dealer hand sum
                 elif (not self.natural_blackjacks[hand_idx]) and (self.counted_hand_sums[hand_idx] == game.dealer.counted_hand_sum):
                     if game.dealer.natural_blackjack:
                         self.round_result = "lose"
+                        self.round_result_stat -= 1
+                        if self.double_down_bets[hand_idx]:
+                            self.round_result_stat -= 1
                     else:
                         self.capital += (self.bets[hand_idx])
                         self.round_result = "push"
@@ -210,14 +225,21 @@ class Player:
                 elif (self.natural_blackjacks[hand_idx]) and (not game.dealer.natural_blackjack):
                     self.capital += (self.bets[hand_idx] * (float(game.config['BLACKJACK_PAYOUT']) + 1))
                     self.round_result = "blackjack"
+                    self.round_result_stat += 1.5
                 elif self.natural_blackjacks[hand_idx] and (game.dealer.natural_blackjack):
                     self.capital += (self.bets[hand_idx])
                     self.round_result = "push"
                 elif (self.counted_hand_sums[hand_idx] > game.dealer.counted_hand_sum) or (game.dealer.bust):
                     self.capital += (self.bets[hand_idx] * 2)
                     self.round_result = "win"
+                    self.round_result_stat += 1
+                    if self.double_down_bets[hand_idx]:
+                        self.round_result_stat += 1
                 elif self.counted_hand_sums[hand_idx] < game.dealer.counted_hand_sum:
                     self.round_result = "lose"
+                    self.round_result_stat -= 1
+                    if self.double_down_bets[hand_idx]:
+                        self.round_result_stat -= 1
 
                 if self.move_histories == []:
                     self.move_histories.append([])
@@ -264,6 +286,7 @@ class Player:
         self.insurance = False
         self.bust = [False]
         self.round_result = None
+        self.round_result_stat = 0
         self.move_histories = []
         self.split_count = 0
         self.natural_blackjacks = [False]
@@ -290,6 +313,7 @@ class Player:
             #"surrender": self.surrender,
             #"insurance": self.insurance,
             "round_result": self.round_result,
+            "round_result_stat": self.round_result_stat,
             "move_history": str(self.move_histories[hand_idx]),
             #"split_counter": self.split_count,
             #"natural_blackjack": self.natural_blackjacks[hand_idx],
