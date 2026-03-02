@@ -88,17 +88,20 @@ def surrender(player, game):
     # pairs logic
     if player.hands[0][0] == player.hands[0][1]:
         move = pairs_table[player.hands[0][0]][game.dealer_face_card]
+        move = restrict_strategy(game, move)
         if 'U' in move:
             player.surrender = True
     # soft hand logic
     elif player.has_soft_hand(0):
         soft_value = player.counted_hand_sums[0] - 11
         move = soft_hand_table[soft_value][game.dealer_face_card]
+        move = restrict_strategy(game, move)
         if 'U' in move:
             player.surrender = True
     # hard hand logic
     elif player.counted_hand_sums[0] < 22:
         move = hard_hand_table[player.counted_hand_sums[0]][game.dealer_face_card]
+        move = restrict_strategy(game, move)
         if 'U' in move:
             player.surrender = True
 

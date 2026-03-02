@@ -154,6 +154,7 @@ class Player:
             raise ValueError("Bet is greater than max bet")
         self.capital -= bet
         self.bets[hand_idx] += bet
+        self.double_down_bets[hand_idx] = True
 
 
     def add_card(self, card, hand_idx):
@@ -194,6 +195,14 @@ class Player:
             else:
                 self.round_result_stat -= 0.5
 
+    
+    def evaluate_insurance_result_no_capital_change(self, game):
+        if self.insurance:
+            if game.dealer.peek_has_blackjack:
+                self.round_result_stat += 1
+            else:
+                self.round_result_stat -= 0.5
+
 
     def evaluate_hand_result(self, game):
         round_results = []
@@ -201,6 +210,7 @@ class Player:
         if self.surrender:
             self.capital += (self.bets[0]/2)
             self.round_result = "surrender"
+            self.round_result_stat -= 0.5
             round_results.append(self.get_results(game, 0))
         # Evaluate hands
         else:
@@ -244,6 +254,8 @@ class Player:
                 if self.move_histories == []:
                     self.move_histories.append([])
                 round_results.append(self.get_results(game, hand_idx))
+                self.round_result_stat = 0
+                self.evaluate_insurance_result_no_capital_change(game)
 
         game.results.add_result(round_results)
         
