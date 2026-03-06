@@ -12,6 +12,12 @@ config.read('config.ini')
 def config_betting_strategy(player, game):
     if player.betting_strategy == "minimal_bet":
         minimal_bet(player, game)
+    elif player.betting_strategy == "kelly":
+        kelly(player, game)
+    elif player.betting_strategy == "half_kelly":
+        kelly(player, game)
+    elif player.betting_strategy == "quarter_kelly":
+        kelly(player, game)
     else:
         raise ValueError("Invalid betting strategy")
 

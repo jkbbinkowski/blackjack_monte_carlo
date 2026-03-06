@@ -1,0 +1,80 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(dplyr)
+dane <- read.csv("/Users/jakubbinkowski/dev_repo/blackjack_monte_carlo/results/results_20260303_174848.csv", sep=";")
+
+dane_zsumowane <- dane %>%
+  group_by(round, player_idx) %>%
+  summarise(calkowity_wynik = sum(round_result_stat), true_count = first(true_count), .groups = 'drop')
+```
+
+```{r}
+plot(density(dane_zsumowane$calkowity_wynik))
+
+mu <- mean(dane_zsumowane$calkowity_wynik, na.rm = TRUE)
+sigma <- sd(dane_zsumowane$calkowity_wynik, na.rm = TRUE)
+
+cat("EV: ", mu, "\n")
+cat("Std dev: ", sigma, "\n")
+curve(dnorm(x, mean = mu, sd = sigma), 
+      add = TRUE, 
+      col = "darkgreen", 
+      lwd = 3)
+```
+
+```{r}
+ks.test(dane_zsumowane$calkowity_wynik, "pnorm", 
+        mean = mean(dane_zsumowane$calkowity_wynik, na.rm = TRUE), 
+        sd = sd(dane_zsumowane$calkowity_wynik, na.rm = TRUE))
+```
+
+```{r}
+library(moments); 
+skewness(dane_zsumowane$calkowity_wynik)
+kurtosis(dane_zsumowane$calkowity_wynik)
+install.packages("randtests")
+library(randtests); 
+runs.test(dane_zsumowane$calkowity_wynik)
+```
+
+```{r}
+plot(cumsum(dane_zsumowane$calkowity_wynik[1:10000000]), 
+     type = "l", 
+     col = "darkgreen", 
+     main = "Skumulowany wynik (Random Walk)")
+abline(h = 0, lty = 2)
+```
+
+```{r}
+library(ggplot2)
+
+statystyki_kelly <- dane_zsumowane %>%
+  group_by(true_count) %>%
+  summarise(
+    n_rozdan = n(),
+    ev = mean(calkowity_wynik),
+    wariancja = var(calkowity_wynik),
+    # Wzór Kelly'ego: f* = EV / wariancja
+    kelly_fraction = ev / wariancja
+  ) %>%
+  filter(n_rozdan > 30) # Odrzucamy szum z rzadkich TC
+
+# 3. Wizualizacja "Bestii" (Wariancji)
+ggplot(statystyki_kelly, aes(x = true_count, y = wariancja)) +
+  geom_line(color = "steelblue", size = 1) +
+  geom_point(size = 3, color = "darkblue") +
+  geom_smooth(method = "lm", linetype = "dashed", color = "red", se = FALSE) +
+  labs(
+    title = "Wariancja rzeczywista vs True Count",
+    x = "True Count",
+    y = "Wariancja (sigma^2)"
+  ) +
+  theme_minimal()
+
+# 4. Wyświetlenie tabeli z frakcją Kelly'ego
+print(statystyki_kelly %>% select(true_count, ev, wariancja, kelly_fraction))
+```
