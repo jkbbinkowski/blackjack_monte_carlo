@@ -73,6 +73,9 @@ The simulator so far consists of one, non-sensitive configuration file. Below th
 | Value | Description | Important |
 | ----- | ----------- | --------- |
 | minimal_bet | every time player places a bet equal to GAME-MIN_BET | | 
+| kelly | placing bet using kelly criterion | kelly is designed only to use with basic strategy and it's deviations |
+| half_kelly | placing bet using kelly criterion with 0,5 multiplier | kelly is designed only to use with basic strategy and it's deviations |
+| quarter_kelly | placing bet using kelly criterion with 0,25 multiplier | kelly is designed only to use with basic strategy and it's deviations |
 
 ### -PLAYERS-INSURANCE_STRATEGIES
 | Value | Description | Important |
