@@ -68,6 +68,8 @@ The simulator so far consists of one, non-sensitive configuration file. Below th
 | ----- | ----------- | --------- |
 | basic_strategy | player plays only using basic strategy tables | tables are located in strategies module, verify the moves because they might differ for different game rules |
 | mimic_the_dealer | player plays the same way as dealer | | 
+| bs_il18 | player plays using basic strategy with ilustorious 18 deviations | shall be used with proper insurance strategy | 
+| bs_il_fab4 | player plays using basic strategy with ilustorious 18 deviations and fabulous 4 movements | shall be used with proper insurance strategy | 
 
 ### PLAYERS-BETTING_STRATEGIES
 | Value | Description | Important |
@@ -82,6 +84,7 @@ The simulator so far consists of one, non-sensitive configuration file. Below th
 | ----- | ----------- | --------- |
 | no_insurance | player does not use insurance at all | |
 | always_play_insurance | player uses insurance at every possible occasion | | 
+| il18_insurance | player uses insurance along with ilustrious 18 deviations | shall be used with proper playing strategy | 
 
 ## DEALER-HOLE_CARD
 | Value | Description | Important |

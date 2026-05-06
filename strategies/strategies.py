@@ -27,6 +27,8 @@ def config_playing_strategy(player, game):
         mimic_the_dealer(player, game)
     elif player.playing_strategy == "basic_strategy":
         basic_strategy(player, game)
+    elif player.playing_strategy == "bs_il18" or player.playing_strategy == "bs_il18_fab4":
+        bs_il18(player, game)
     else:
         raise ValueError("Invalid playing strategy")
 
@@ -36,6 +38,8 @@ def config_insurance_strategy(player, game):
         no_insurance(player, game)
     elif player.insurance_strategy == "always_play_insurance": # always play insurance when possible
         always_play_insurance(player, game)
+    elif player.insurance_strategy == "il18_insurance": # play insurance with IL18 deviations
+        il18_insurance(player, game)
     else:
         raise ValueError("Invalid insurance strategy")
 
@@ -43,6 +47,12 @@ def config_insurance_strategy(player, game):
 def config_surrender_strategy(player, game):
     if player.playing_strategy == 'basic_strategy':
         basic_strategy_surrender(player, game)
+    elif player.playing_strategy == 'bs_il18':
+        basic_strategy_surrender(player, game)
+    elif player.playing_strategy == 'bs_il18_fab4':
+        fab4_surrender(player, game)
+    else:
+        raise ValueError("Invalid surrender strategy")
 
 
 def config_dealer_strategy(dealer, game):
