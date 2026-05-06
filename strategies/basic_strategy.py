@@ -33,6 +33,7 @@ def evaluate_move(game, player, hand_idx, move):
 
     return move
 
+
 # evaluate based on H17/S17
 def restrict_strategy(game, move):
     if '/' in move:

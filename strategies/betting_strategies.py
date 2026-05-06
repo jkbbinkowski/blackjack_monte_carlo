@@ -9,6 +9,7 @@ def minimal_bet(player, game):
     player.capital -= bet
     player.bets.append(bet)
 
+
 def kelly(player, game):
     min_bet = int(game.config['MIN_BET'])
     max_bet = int(game.config['MAX_BET'])
