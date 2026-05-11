@@ -91,20 +91,20 @@ class Game:
 
 
     def calculate_true_count(self, card):
-        if card:
-            if card <= 6:
-                self.running_count += 1
-            elif card >= 10:
-                self.running_count -= 1
-        else:
+        if card is None:
             self.running_count = 0
-        self.cards_at_stack_percentage = round(((self.total_stack - self.used_cards_amount) / self.total_stack), 2)
+            return
+            
+        if card in [2, 3, 4, 5, 6]:
+            self.running_count += 1
+        elif card in [10, 11, 12, 13, 1]:
+            self.running_count -= 1
 
-        #calculate remaining decks and round them to 0,5, to ensure reality and kelly criterion advices
-        decks_remaining = int(self.config['DECKS_AMOUNT']) * self.cards_at_stack_percentage
-        decks_remaining_rounded = max(0.5, round(decks_remaining * 2) / 2.0)
-
-        self.true_count = round((self.running_count / decks_remaining_rounded), 2)
+        if self.total_stack > 0:
+            self.cards_at_stack_percentage = round(((self.total_stack - self.used_cards_amount) / self.total_stack), 2)
+            decks_remaining = int(self.config['DECKS_AMOUNT']) * self.cards_at_stack_percentage
+            decks_remaining_rounded = max(0.5, round(decks_remaining * 2) / 2.0)
+            self.true_count = round((self.running_count / decks_remaining_rounded), 2)
 
 
 class Player:
