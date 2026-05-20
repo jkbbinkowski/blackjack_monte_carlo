@@ -5,7 +5,7 @@ output: html_notebook
 
 ```{r}
 library(dplyr)
-dane <- read.csv("/Users/jakubbinkowski/dev_repo/blackjack_monte_carlo/results/results_20260303_174848.csv", sep=";")
+dane <- read.csv("/Users/jakubbinkowski/dev_repo/blackjack_monte_carlo/results/results_20260512_013729.csv", sep=";")
 
 dane_zsumowane <- dane %>%
   group_by(round, player_idx) %>%
@@ -50,31 +50,149 @@ abline(h = 0, lty = 2)
 ```
 
 ```{r}
+library(dplyr)
 library(ggplot2)
 
-statystyki_kelly <- dane_zsumowane %>%
-  group_by(true_count) %>%
+statystyki_kelly_zbinowane <- dane_zsumowane %>%
+  mutate(tc_kategoria = case_when(
+    true_count <= -5 ~ "<= -5 TC",
+    true_count > -5 & true_count <= -2 ~ "-4 do -2 TC",
+    true_count > -2 & true_count <= 0 ~ "-1 do 0 TC",
+    true_count > 0 & true_count <= 2 ~ "+1 do +2 TC",
+    true_count > 2 & true_count <= 5 ~ "+3 do +5 TC",
+    true_count > 5 ~ "> +5 TC"
+  )) %>%
+  mutate(tc_kategoria = factor(tc_kategoria, levels = c(
+    "<= -5 TC", 
+    "-4 do -2 TC", 
+    "-1 do 0 TC", 
+    "+1 do +2 TC", 
+    "+3 do +5 TC", 
+    "> +5 TC"
+  ))) %>%
+  group_by(tc_kategoria) %>%
   summarise(
     n_rozdan = n(),
-    ev = mean(calkowity_wynik),
-    wariancja = var(calkowity_wynik),
-    # Wzór Kelly'ego: f* = EV / wariancja
-    kelly_fraction = ev / wariancja
+    ev = mean(calkowity_wynik, na.rm = TRUE),
+    wariancja = var(calkowity_wynik, na.rm = TRUE),
+    kelly_fraction = ev / wariancja,
+    .groups = 'drop'
   ) %>%
-  filter(n_rozdan > 30) # Odrzucamy szum z rzadkich TC
+  filter(n_rozdan > 100)
 
-# 3. Wizualizacja "Bestii" (Wariancji)
-ggplot(statystyki_kelly, aes(x = true_count, y = wariancja)) +
-  geom_line(color = "steelblue", size = 1) +
-  geom_point(size = 3, color = "darkblue") +
-  geom_smooth(method = "lm", linetype = "dashed", color = "red", se = FALSE) +
+print(statystyki_kelly_zbinowane)
+
+# Robimy nowy, wygładzony wykres "Bestii"
+ggplot(statystyki_kelly_zbinowane, aes(x = tc_kategoria, y = wariancja, group = 1)) +
+  geom_line(color = "steelblue", size = 1.5) +
+  geom_point(size = 4, color = "darkred") +
   labs(
-    title = "Wariancja rzeczywista vs True Count",
-    x = "True Count",
+    title = "Wariancja vs Pogrupowany True Count",
+    subtitle = "Po wyeliminowaniu szumu losowego",
+    x = "Kategoria True Count",
     y = "Wariancja (sigma^2)"
   ) +
-  theme_minimal()
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
 
-# 4. Wyświetlenie tabeli z frakcją Kelly'ego
-print(statystyki_kelly %>% select(true_count, ev, wariancja, kelly_fraction))
+
+```{r}
+library(dplyr)
+
+# --- DODATKOWE FUNKCJE DO ANALIZY RYZYKA ---
+
+# ROR
+calculate_ror <- function(u, sigma_sq, B) {
+  if (u <= 0) {
+    return(1.0)
+  }
+  ror <- exp((-2 * u * B) / sigma_sq)
+  return(min(ror, 1.0))
+}
+
+# Sharpe
+calculate_sharpe <- function(u, sigma) {
+  rf <- 0
+  if (sigma == 0) return(NA)
+  return((u - rf) / sigma)
+}
+
+# VAR analityczny
+calculate_var_analytical <- function(u, sigma, n_hands, alpha = 0.05) {
+  k <- qnorm(1 - alpha)
+  var_value <- (k * sigma * sqrt(n_hands) - u * n_hands) 
+  return(var_value)
+}
+
+# VAR Monte Carlo 
+calculate_var_mc <- function(dane_surowe, dlugosc_sesji = 100, alpha = 0.05) {
+  wyniki_sesji <- dane_surowe %>%
+    mutate(session_id = (row_number() - 1) %/% dlugosc_sesji + 1) %>%
+    group_by(session_id) %>%
+    summarise(
+      wynik_sesji = sum(round_result_stat, na.rm = TRUE),
+      liczba_rozdan = n(),
+      .groups = 'drop'
+    ) %>%
+    filter(liczba_rozdan == dlugosc_sesji)
+    
+  var_mc <- quantile(wyniki_sesji$wynik_sesji, probs = alpha, na.rm = TRUE)
+  
+  cvar_mc <- mean(wyniki_sesji$wynik_sesji[wyniki_sesji$wynik_sesji <= var_mc], na.rm = TRUE)
+  
+  return(list(VaR = as.numeric(var_mc), CVaR = cvar_mc))
+}
+
+# --- OBLICZENIA GŁÓWNE ---
+
+u_global <- mean(dane$round_result_stat, na.rm = TRUE)
+sigma_global <- sd(dane$round_result_stat, na.rm = TRUE)
+sigma_sq_global <- var(dane$round_result_stat, na.rm = TRUE)
+
+kapital_poczatkowy <- 20000000 
+dlugosc_sesji <- 100
+
+cat("\n--- RESULTS ---\n")
+
+# RoR
+ror_wynik <- calculate_ror(u_global, sigma_sq_global, kapital_poczatkowy)
+cat(sprintf("Risk of Ruin (RoR): %.2f%%\n", ror_wynik * 100))
+
+# Sharpe
+sharpe_wynik <- calculate_sharpe(u_global, sigma_global)
+cat(sprintf("Wskaźnik Sharpe'a (dla pojedynczego rozdania): %.5f\n", sharpe_wynik))
+
+# VaR Analityczny
+var_analit <- calculate_var_analytical(u_global, sigma_global, dlugosc_sesji)
+cat(sprintf("VaR (Analityczny, 95%%) dla %d rozdań: %.2f jednostek\n", dlugosc_sesji, var_analit))
+
+# VaR Monte Carlo
+mc_results <- calculate_var_mc(dane, dlugosc_sesji = dlugosc_sesji)
+cat(sprintf("VaR (Monte Carlo, 95%%) dla sesji %d rozdań: %.2f jednostek\n", dlugosc_sesji, mc_results$VaR))
+cat(sprintf("CVaR (Expected Shortfall, 95%%): %.2f jednostek\n", mc_results$CVaR))
+```
+
+
+```{r}
+dane_zsumowane <- dane %>%
+  mutate(zysk_kwotowy = as.numeric(round_result_stat) * as.numeric(bet)) %>%
+  group_by(round, player_idx) %>%
+  summarise(
+    calkowity_wynik_jednostkowy = sum(round_result_stat, na.rm = TRUE),
+    prawdziwy_zysk = sum(zysk_kwotowy, na.rm = TRUE),
+    true_count = first(true_count), 
+    .groups = 'drop'
+  )
+
+mu_finansowe <- mean(dane_zsumowane$prawdziwy_zysk, na.rm = TRUE)
+sigma_finansowa <- sd(dane_zsumowane$prawdziwy_zysk, na.rm = TRUE)
+
+cat("Finansowe EV (zysk z rozdania): ", mu_finansowe, "\n")
+cat("Finansowe Std dev: ", sigma_finansowa, "\n")
+
+plot(cumsum(dane_zsumowane$prawdziwy_zysk[1:10000000]), 
+     type = "l", 
+     col = "darkgreen", 
+     main = "Skumulowany zysk kwotowy")
 ```

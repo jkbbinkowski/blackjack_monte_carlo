@@ -433,7 +433,7 @@ class Results:
         self.config = config['SIMULATION']
         self.folder_name = self.config['EXPORT_FOLDER']
         self.time_str = str(time.strftime("%Y%m%d_%H%M%S"))
-        self.file_path = f"{self.folder_name}/{self.config['EXPORT_FILE_NAME']}_{self.time_str}.csv"
+        self.file_path = f"{self.folder_name}/{self.config['EXPORT_FILE_NAME']}_{self.time_str}_{random.randint(1, 1000000)}.csv"
 
         if int(self.config['EXPORT_CSV']) == 1: 
             self.create_directory()
